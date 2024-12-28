@@ -16,9 +16,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      run: cargo build --verbose
-    # - name: Run tests
-    #   run: cargo test --verbose
+      run: cargo build --release --verbose
+    - name: Package Binary
+      run: |
+        cd target/release
+        tar -czf ../../linux-binary.tar.gz *
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-binary
+        path: linux-binary.tar.gz
 
   build-windows:
     runs-on: windows-latest
@@ -30,6 +37,13 @@ jobs:
     - name: Set up Rust toolchain
       run: rustup default stable-x86_64-pc-windows-msvc
     - name: Build
-      run: cargo build --verbose
-    # - name: Run tests
-    #   run: cargo test --verbose
+      run: cargo build --release --verbose
+    - name: Package Binary
+      run: |
+        cd target/release
+        Compress-Archive -Path *.exe -DestinationPath ../../windows-binary.zip
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-binary
+        path: windows-binary.zip
