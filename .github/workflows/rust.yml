@@ -1,6 +1,3 @@
-To modify the GitHub Actions workflow to build the Rust project for Windows, you can add a new job that runs on a Windows runner (`windows-latest`). Here is an updated version of your workflow file:
-
-```yaml
 name: Rust
 
 on:
