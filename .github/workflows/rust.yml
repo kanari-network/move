@@ -9,41 +9,27 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+permissions:
+  contents: read
+  
 jobs:
-  build-linux:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --release --verbose
-    - name: Package Binary
-      run: |
-        cd target/release
-        tar -czf ../../linux-binary.tar.gz *
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: linux-binary
-        path: linux-binary.tar.gz
+    - uses: actions/checkout@v2
 
-  build-windows:
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v4
     - name: Install Rust
-      run: rustup install stable-x86_64-pc-windows-msvc
-    - name: Set up Rust toolchain
-      run: rustup default stable-x86_64-pc-windows-msvc
-    - name: Build
-      run: cargo build --release --verbose
-    - name: Package Binary
-      run: |
-        cd target/release
-        Compress-Archive -Path *.exe -DestinationPath ../../windows-binary.zip
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions-rs/toolchain@v1
       with:
-        name: windows-binary
-        path: windows-binary.zip
+        toolchain: stable
+        override: true
+
+    - name: Build
+      run: cargo build --release
+
+
+
+
+  
+    
