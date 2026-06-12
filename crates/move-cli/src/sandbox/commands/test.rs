@@ -24,7 +24,7 @@ use std::{
     fs::{self, File},
     io::{self, BufRead, Write},
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, ExitStatus, Output},
 };
 use tempfile::tempdir;
 
@@ -157,11 +157,158 @@ fn simple_copy_dir(dst: &Path, src: &Path) -> io::Result<()> {
         if src_entry_path.is_dir() {
             fs::create_dir_all(&dst_entry_path)?;
             simple_copy_dir(&dst_entry_path, &src_entry_path)?;
+        } else if matches!(
+            src_entry_path.extension().and_then(|ext| ext.to_str()),
+            Some("md" | "move" | "toml" | "txt")
+        ) {
+            let contents = fs::read_to_string(&src_entry_path)?;
+            fs::write(&dst_entry_path, contents.replace("\r\n", "\n"))?;
         } else {
             fs::copy(&src_entry_path, &dst_entry_path)?;
         }
     }
     Ok(())
+}
+
+#[cfg(unix)]
+fn success_exit_status() -> ExitStatus {
+    use std::os::unix::process::ExitStatusExt;
+    ExitStatus::from_raw(0)
+}
+
+#[cfg(windows)]
+fn success_exit_status() -> ExitStatus {
+    use std::os::windows::process::ExitStatusExt;
+    ExitStatus::from_raw(0)
+}
+
+fn successful_output(stdout: Vec<u8>) -> Output {
+    Output {
+        status: success_exit_status(),
+        stdout,
+        stderr: Vec::new(),
+    }
+}
+
+fn relative_files(root: &Path) -> io::Result<Vec<PathBuf>> {
+    fn visit(root: &Path, current: &Path, files: &mut Vec<PathBuf>) -> io::Result<()> {
+        for entry in fs::read_dir(current)? {
+            let path = entry?.path();
+            if path.is_dir() {
+                visit(root, &path, files)?;
+            } else {
+                files.push(path.strip_prefix(root).unwrap().to_path_buf());
+            }
+        }
+        Ok(())
+    }
+
+    let mut files = Vec::new();
+    visit(root, root, &mut files)?;
+    files.sort();
+    Ok(files)
+}
+
+fn files_equal(left: &Path, right: &Path) -> io::Result<bool> {
+    let left = fs::read(left)?;
+    let right = fs::read(right)?;
+    Ok(match (String::from_utf8(left), String::from_utf8(right)) {
+        (Ok(left), Ok(right)) => left.replace("\r\n", "\n") == right.replace("\r\n", "\n"),
+        (Err(left), Err(right)) => left.as_bytes() == right.as_bytes(),
+        _ => false,
+    })
+}
+
+fn external_command_output(
+    program: &str,
+    args: &[&str],
+    work_dir: &Path,
+) -> anyhow::Result<Output> {
+    match (program, args) {
+        ("mv", [from, to]) => {
+            fs::rename(work_dir.join(from), work_dir.join(to))?;
+            Ok(successful_output(Vec::new()))
+        }
+        ("rm", ["-rf", path]) => {
+            let path = work_dir.join(path);
+            if path.exists() {
+                fs::remove_dir_all(path)?;
+            }
+            Ok(successful_output(Vec::new()))
+        }
+        ("cat", paths) => {
+            let mut stdout = Vec::new();
+            for path in paths {
+                stdout.extend(fs::read(work_dir.join(path))?);
+            }
+            Ok(successful_output(stdout))
+        }
+        ("grep", [pattern, path]) => {
+            let contents = fs::read_to_string(work_dir.join(path))?;
+            let stdout = contents.lines().filter(|line| line.contains(pattern)).fold(
+                String::new(),
+                |mut output, line| {
+                    writeln!(output, "{line}").unwrap();
+                    output
+                },
+            );
+            Ok(successful_output(stdout.into_bytes()))
+        }
+        ("diff", ["-s", left, right]) => {
+            anyhow::ensure!(
+                files_equal(&work_dir.join(left), &work_dir.join(right))?,
+                "Files {left} and {right} differ"
+            );
+            Ok(successful_output(
+                format!("Files {left} and {right} are identical\n").into_bytes(),
+            ))
+        }
+        ("diff", ["-r", "-s", left, right]) => {
+            let left_root = work_dir.join(left);
+            let right_root = work_dir.join(right);
+            let left_files = relative_files(&left_root)?;
+            anyhow::ensure!(
+                left_files == relative_files(&right_root)?,
+                "Directories {left} and {right} differ"
+            );
+
+            let mut stdout = String::new();
+            for relative_path in left_files {
+                anyhow::ensure!(
+                    files_equal(
+                        &left_root.join(&relative_path),
+                        &right_root.join(&relative_path)
+                    )?,
+                    "Files differ: {}",
+                    relative_path.display()
+                );
+                let relative_path = relative_path.to_string_lossy().replace('\\', "/");
+                writeln!(
+                    stdout,
+                    "Files {left}/{relative_path} and {right}/{relative_path} are identical"
+                )?;
+            }
+            Ok(successful_output(stdout.into_bytes()))
+        }
+        _ => Ok(Command::new(program)
+            .args(args)
+            .current_dir(work_dir)
+            .output()?),
+    }
+}
+
+fn normalize_test_output(output: &str) -> String {
+    let output = output.replace("\r\n", "\n");
+    #[cfg(windows)]
+    let output = output
+        .replace("\\\\", "/")
+        .replace('\\', "/")
+        .replace("move.exe", "move")
+        .replace(
+            "The system cannot find the path specified. (os error 3)",
+            "No such file or directory (os error 2)",
+        );
+    output
 }
 
 /// Run the `args_path` batch file with`cli_binary`
@@ -229,15 +376,8 @@ pub fn run_one(
             let mut cmd_iter = external_cmd.split_ascii_whitespace();
 
             let external_program = cmd_iter.next().expect("empty external command");
-
-            let mut command = Command::new(external_program);
-            command.args(cmd_iter);
-            if let Some(work_dir) = temp_dir.as_ref() {
-                command.current_dir(&work_dir.1);
-            } else {
-                command.current_dir(exe_dir);
-            }
-            let cmd_output = command.output()?;
+            let external_args = cmd_iter.collect::<Vec<_>>();
+            let cmd_output = external_command_output(external_program, &external_args, wks_dir)?;
 
             writeln!(&mut output, "External Command `{}`:", external_cmd)?;
             output += std::str::from_utf8(&cmd_output.stdout)?;
@@ -330,12 +470,14 @@ pub fn run_one(
     // compare output and exp_file
     let update_baseline = read_env_update_baseline();
     let exp_path = args_path.with_extension(EXP_EXT);
+    let output = normalize_test_output(&output);
     if update_baseline {
         fs::write(exp_path, &output)?;
         return Ok(cov_info);
     }
 
-    let expected_output = fs::read_to_string(exp_path).unwrap_or_else(|_| "".to_string());
+    let expected_output =
+        normalize_test_output(&fs::read_to_string(exp_path).unwrap_or_else(|_| "".to_string()));
     if expected_output != output {
         let msg = format!(
             "Expected output differs from actual output:\n{}",
