@@ -43,7 +43,6 @@ pub(crate) struct ModuleBuilder<'env, 'translator> {
 }
 
 /// # Entry Points
-
 impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
     pub fn new(
         parent: &'translator mut ModelBuilder<'env>,
@@ -141,7 +140,6 @@ impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
 }
 
 /// # Attribute Analysis
-
 impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
     pub fn translate_attributes<T: TName>(
         &mut self,
@@ -246,7 +244,6 @@ impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
 }
 
 /// # Declaration Analysis
-
 impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
     fn decl_ana(
         &mut self,
@@ -332,7 +329,6 @@ impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
 }
 
 /// # Definition Analysis
-
 impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
     fn def_ana(&mut self, module_def: &EA::ModuleDefinition) {
         // Analyze all structs.
@@ -354,7 +350,6 @@ impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
 }
 
 /// ## Struct Definition Analysis
-
 impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
     fn def_ana_struct(&mut self, name: &PA::DatatypeName, def: &EA::StructDefinition) {
         let qsym = self.qualified_by_module_from_name(&name.0);
@@ -401,7 +396,6 @@ impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
 }
 
 /// ## Move Function Definition Analysis
-
 impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
     /// Definition analysis for Move functions.
     /// If the function is pure, we translate its body.
@@ -430,7 +424,6 @@ impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
 }
 
 /// # Environment Population
-
 impl<'env, 'translator> ModuleBuilder<'env, 'translator> {
     fn populate_env_from_result(
         &mut self,

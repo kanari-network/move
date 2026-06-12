@@ -130,8 +130,8 @@ fn check_has_unit_test_module(
     let has_unit_test_module = has_unit_test_module(prog)
         || pre_compiled_lib.is_some_and(|p| has_unit_test_module(&p.parser));
 
-    if !has_unit_test_module && compilation_env.flags().is_testing() {
-        if let Some(P::PackageDefinition { def, .. }) = prog
+    if !has_unit_test_module && compilation_env.flags().is_testing()
+        && let Some(P::PackageDefinition { def, .. }) = prog
             .source_definitions
             .iter()
             .chain(prog.lib_definitions.iter())
@@ -151,7 +151,6 @@ fn check_has_unit_test_module(
             ));
             return false;
         }
-    }
 
     true
 }

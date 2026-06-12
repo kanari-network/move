@@ -1337,7 +1337,7 @@ impl<'env> Docgen<'env> {
                 // Cannot resolve.
                 return None;
             }
-            let addr = BigUint::parse_bytes(parts[0][2..].as_bytes(), 16)?;
+            let addr = BigUint::parse_bytes(&parts[0].as_bytes()[2..], 16)?;
             let mname = ModuleName::new(addr, self.env.symbol_pool().make(parts[1]));
             parts = &parts[2..];
             Some(self.env.find_module(&mname)?)

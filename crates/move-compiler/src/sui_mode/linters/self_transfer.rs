@@ -146,8 +146,8 @@ impl SimpleAbsInt for SelfTransferVerifierAI {
             .iter()
             .any(|(addr, module, fun)| f.is(addr, module, fun))
         {
-            if let Value::SenderAddress(sender_addr_loc) = args[1] {
-                if is_wrappable_obj_type(&f.arguments[0].ty) {
+            if let Value::SenderAddress(sender_addr_loc) = args[1]
+                && is_wrappable_obj_type(&f.arguments[0].ty) {
                     let msg = "Transfer of an object to transaction sender address";
                     let uid_msg = "Returning an object from a function, allows a caller to use the object \
                                and enables composability via programmable transactions.";
@@ -160,7 +160,6 @@ impl SimpleAbsInt for SelfTransferVerifierAI {
                     }
                     context.add_diag(d);
                 }
-            }
             return Some(vec![]);
         }
         if f.is("sui", "tx_context", "sender") {

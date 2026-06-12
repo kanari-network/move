@@ -714,7 +714,7 @@ impl<'env> Context<'env> {
                         let m = struct_type.original_mident;
                         let tys_opt = etys_opt.map(|etys| {
                             let tys = types(self, TypeAnnotation::Expression, etys);
-                            let name_f = || format!("{}::{}", &m, &n);
+                            let name_f = || format!("{}::{}", m, n);
                             check_type_argument_arity(self, loc, name_f, tys, struct_type.arity)
                         });
                         Some((m, DatatypeName(n), tys_opt, struct_type.field_info))
@@ -1488,8 +1488,8 @@ fn function_signature(
                 check_mut_underscore(context, Some(mut_));
                 mut_ = Mutability::Imm;
             };
-            if param.is_syntax_identifier() {
-                if let Mutability::Mut(mutloc) = mut_ {
+            if param.is_syntax_identifier()
+                && let Mutability::Mut(mutloc) = mut_ {
                     let msg = format!(
                         "Invalid 'mut' parameter. \
                         '{}' parameters cannot be declared as mutable",
@@ -1500,9 +1500,8 @@ fn function_signature(
                     context.env.add_diag(diag);
                     mut_ = Mutability::Imm;
                 }
-            }
-            if let Err((param, prev_loc)) = declared.add(param, ()) {
-                if !is_underscore {
+            if let Err((param, prev_loc)) = declared.add(param, ())
+                && !is_underscore {
                     let msg = format!("Duplicate parameter with name '{}'", param);
                     context.env.add_diag(diag!(
                         Declarations::DuplicateItem,
@@ -1510,7 +1509,6 @@ fn function_signature(
                         (prev_loc, "Previously declared here"),
                     ))
                 }
-            }
             let is_parameter = true;
             let nparam = context.declare_local(is_parameter, param.0);
             let nparam_ty = type_(context, case, param_ty);
@@ -1826,7 +1824,7 @@ fn type_(context: &mut Context, case: TypeAnnotation, sp!(loc, ety_): E::Type) -
                 }
             }
             RT::BuiltinType(bn_) => {
-                let name_f = || format!("{}", &bn_);
+                let name_f = || format!("{}", bn_);
                 let arity = bn_.tparam_constraints(loc).len();
                 let tys = types(context, case, tys);
                 let tys = check_type_argument_arity(context, loc, name_f, tys, arity);
@@ -2011,7 +2009,7 @@ fn exp(context: &mut Context, e: Box<E::Exp>) -> Box<N::Exp> {
                 context,
                 TypeAnnotation::Expression,
                 eloc,
-                || format!("{}::{}", &m, &n),
+                || format!("{}::{}", m, n),
                 etys_opt,
                 ty.type_arity(),
             );
@@ -2209,7 +2207,7 @@ fn exp(context: &mut Context, e: Box<E::Exp>) -> Box<N::Exp> {
                 context,
                 TypeAnnotation::Expression,
                 eloc,
-                || format!("{}::{}", &m, &n),
+                || format!("{}::{}", m, n),
                 etys_opt,
                 ty.type_arity(),
             );
@@ -2255,7 +2253,7 @@ fn exp(context: &mut Context, e: Box<E::Exp>) -> Box<N::Exp> {
             };
             let tys_opt = etys_opt.map(|etys| {
                 let tys = types(context, TypeAnnotation::Expression, etys);
-                let name_f = || format!("{}::{}", &m, &n);
+                let name_f = || format!("{}::{}", m, n);
                 check_type_argument_arity(context, eloc, name_f, tys, ty.type_arity())
             });
             check_constructor_form(context, eloc, ConstructorForm::Parens, "instantiation", &ty);
@@ -2724,7 +2722,7 @@ fn unique_pattern_binders(
 ) -> Vec<(Mutability, P::Var)> {
     use E::MatchPattern_ as EP;
 
-    fn report_duplicate(context: &mut Context, var: P::Var, locs: &Vec<(Mutability, Loc)>) {
+    fn report_duplicate(context: &mut Context, var: P::Var, locs: &[(Mutability, Loc)]) {
         assert!(locs.len() > 1, "ICE pattern duplicate detection error");
         let (_, first_loc) = locs.first().unwrap();
         let mut diag = diag!(
@@ -2987,7 +2985,7 @@ fn match_pattern(context: &mut Context, in_pat: Box<E::MatchPattern>) -> Box<N::
                 context,
                 TypeAnnotation::Expression,
                 ploc,
-                || format!("{}::{}", &m, &n),
+                || format!("{}::{}", m, n),
                 etys_opt,
                 ty.type_arity(),
             );
@@ -3030,7 +3028,7 @@ fn match_pattern(context: &mut Context, in_pat: Box<E::MatchPattern>) -> Box<N::
                 context,
                 TypeAnnotation::Expression,
                 ploc,
-                || format!("{}::{}", &m, &n),
+                || format!("{}::{}", m, n),
                 etys_opt,
                 ty.type_arity(),
             );
@@ -3062,7 +3060,7 @@ fn match_pattern(context: &mut Context, in_pat: Box<E::MatchPattern>) -> Box<N::
                 context,
                 TypeAnnotation::Expression,
                 ploc,
-                || format!("{}::{}", &m, &n),
+                || format!("{}::{}", m, n),
                 etys_opt,
                 ty.type_arity(),
             );
@@ -3137,14 +3135,14 @@ fn lvalue(
                         C::Bind => {
                             let msg = format!(
                                 "Duplicate declaration for local '{}' in a given 'let'",
-                                &var
+                                var
                             );
                             ((var.loc, msg), (prev_loc, "Previously declared here"))
                         }
                         C::Assign => {
                             let msg = format!(
                                 "Duplicate usage of local '{}' in a given assignment",
-                                &var
+                                var
                             );
                             ((var.loc, msg), (prev_loc, "Previously assigned here"))
                         }

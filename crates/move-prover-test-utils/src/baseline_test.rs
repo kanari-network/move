@@ -34,7 +34,10 @@ pub fn verify_or_update_baseline(baseline_file_name: &Path, text: &str) -> anyho
         } else {
             String::new()
         };
-        diff(clean_for_baseline(text).as_ref(), &contents)
+        diff(
+            clean_for_baseline(text).as_ref(),
+            clean_for_baseline(&contents).as_ref(),
+        )
     }
 }
 
@@ -102,4 +105,17 @@ Or check the rudimentary diff below:
         }
     }
     Err(anyhow!(result.join("\n")))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::clean_for_baseline;
+
+    #[test]
+    fn clean_for_baseline_normalizes_line_endings() {
+        assert_eq!(
+            clean_for_baseline("first\r\nsecond\r\n"),
+            clean_for_baseline("first\nsecond\n")
+        );
+    }
 }

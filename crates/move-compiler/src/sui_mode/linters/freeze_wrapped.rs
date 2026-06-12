@@ -118,8 +118,8 @@ impl<'a> TypingVisitorContext for Context<'a> {
 
     fn visit_exp_custom(&mut self, exp: &mut T::Exp) -> bool {
         use T::UnannotatedExp_ as E;
-        if let E::ModuleCall(fun) = &exp.exp.value {
-            if FREEZE_FUNCTIONS.iter().any(|(addr, module, fname)| {
+        if let E::ModuleCall(fun) = &exp.exp.value
+            && FREEZE_FUNCTIONS.iter().any(|(addr, module, fname)| {
                 fun.module.value.is(*addr, *module) && &fun.name.value().as_str() == fname
             }) {
                 let Some(bt) = base_type(&fun.type_arguments[0]) else {
@@ -143,7 +143,6 @@ impl<'a> TypingVisitorContext for Context<'a> {
                     );
                 }
             }
-        }
         // always return false to process arguments of the call
         false
     }

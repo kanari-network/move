@@ -980,7 +980,7 @@ fn invalid_phantom_use_error(
             "Phantom type parameter cannot be used as an argument to a non-phantom parameter"
         }
     };
-    let decl_msg = format!("'{}' declared here as phantom", &param.user_specified_name);
+    let decl_msg = format!("'{}' declared here as phantom", param.user_specified_name);
     context.env.add_diag(diag!(
         Declarations::InvalidPhantomUse,
         (ty_loc, msg),
@@ -1215,10 +1215,7 @@ fn subtype_opt<T: ToString, F: FnOnce() -> T>(
     pre_lhs: Type,
     pre_rhs: Type,
 ) -> Option<Type> {
-    match subtype_impl(context, loc, msg, pre_lhs, pre_rhs) {
-        Err(_rhs) => None,
-        Ok(t) => Some(t),
-    }
+    subtype_impl(context, loc, msg, pre_lhs, pre_rhs).ok()
 }
 
 fn subtype<T: ToString, F: FnOnce() -> T>(
@@ -1702,7 +1699,7 @@ fn exp(context: &mut Context, ne: Box<N::Exp>) -> Box<T::Exp> {
         }
         NE::UnaryExp(uop, nr) => {
             use UnaryOp_::*;
-            let msg = || format!("Invalid argument to '{}'", &uop);
+            let msg = || format!("Invalid argument to '{}'", uop);
             let er = exp(context, nr);
             let ty = match &uop.value {
                 Not => {
@@ -1748,7 +1745,7 @@ fn exp(context: &mut Context, ne: Box<N::Exp>) -> Box<T::Exp> {
                 subtype(
                     context,
                     arg.exp.loc,
-                    || format!("Invalid argument for field '{}' for '{}::{}'", f, &m, &n),
+                    || format!("Invalid argument for field '{}' for '{}::{}'", f, m, n),
                     arg.ty.clone(),
                     fty.clone(),
                 );
@@ -1758,7 +1755,7 @@ fn exp(context: &mut Context, ne: Box<N::Exp>) -> Box<T::Exp> {
                 let msg = format!(
                     "Invalid instantiation of '{}::{}'.\nAll structs can only be constructed in \
                      the module in which they are declared",
-                    &m, &n,
+                    m, n,
                 );
                 context
                     .env
@@ -1788,7 +1785,7 @@ fn exp(context: &mut Context, ne: Box<N::Exp>) -> Box<T::Exp> {
                     || {
                         format!(
                             "Invalid argument for field '{}' for '{}::{}::{}'",
-                            f, &m, &e, &v
+                            f, m, e, v
                         )
                     },
                     arg.ty.clone(),
@@ -1800,7 +1797,7 @@ fn exp(context: &mut Context, ne: Box<N::Exp>) -> Box<T::Exp> {
                 let msg = format!(
                     "Invalid instantiation of '{}::{}::{}'.\nAll enum variants can only be \
                     constructed in the module in which they are declared",
-                    &m, &e, &v
+                    m, e, v
                 );
                 context
                     .env
@@ -1850,7 +1847,7 @@ fn binop(
 ) -> Box<T::Exp> {
     use BinOp_::*;
     use T::UnannotatedExp_ as TE;
-    let msg = || format!("Incompatible arguments to '{}'", &bop);
+    let msg = || format!("Incompatible arguments to '{}'", bop);
     let (ty, operand_ty) = match &bop.value {
         Eq | Neq
             if context
@@ -1875,7 +1872,7 @@ fn binop(
                     let ability_msg = Some(format!(
                         "'{}' requires the '{}' ability as the value is consumed. Try \
                                  borrowing the values with '&' first.'",
-                        &bop,
+                        bop,
                         Ability_::Drop,
                     ));
                     context.add_ability_constraint(
@@ -1923,7 +1920,7 @@ fn binop(
             let ability_msg = Some(format!(
                 "'{}' requires the '{}' ability as the value is consumed. Try \
                          borrowing the values with '&' first.'",
-                &bop,
+                bop,
                 Ability_::Drop,
             ));
             context.add_ability_constraint(
@@ -1939,7 +1936,7 @@ fn binop(
         }
 
         And | Or => {
-            let msg = || format!("Invalid argument to '{}'", &bop);
+            let msg = || format!("Invalid argument to '{}'", bop);
             let lloc = el.exp.loc;
             subtype(context, lloc, msg, el.ty.clone(), Type_::bool(bop.loc));
             let rloc = er.exp.loc;
@@ -1962,7 +1959,7 @@ fn binop(
         }
 
         Shl | Shr => {
-            let msg = || format!("Invalid argument to '{}'", &bop);
+            let msg = || format!("Invalid argument to '{}'", bop);
             let u8ty = Type_::u8(er.exp.loc);
             context.add_bits_constraint(el.exp.loc, bop.value.symbol(), el.ty.clone());
             subtype(context, er.exp.loc, msg, er.ty.clone(), u8ty);
@@ -2195,7 +2192,7 @@ fn match_pattern_(
                 let msg = format!(
                     "Invalid pattern for '{}::{}::{}'.\n All enums can only be \
                      matched in the module in which they are declared",
-                    &m, &enum_, &variant
+                    m, enum_, variant
                 );
                 context
                     .env
@@ -2236,7 +2233,7 @@ fn match_pattern_(
                 let msg = format!(
                     "Invalid pattern for '{}::{}'.\n All struct can only be \
                      matched in the module in which they are declared",
-                    &m, &struct_,
+                    m, struct_,
                 );
                 context
                     .env
@@ -2579,7 +2576,7 @@ fn lvalue(
                     subtype(
                         context,
                         loc,
-                        || format!("Invalid assignment to variable '{}'", &var.value.name),
+                        || format!("Invalid assignment to variable '{}'", var.value.name),
                         ty,
                         var_ty.clone(),
                     );
@@ -2636,7 +2633,7 @@ fn lvalue(
                 let msg = format!(
                     "Invalid deconstruction {} of '{}::{}'.\n All structs can only be \
                      deconstructed in the module in which they are declared",
-                    verb, &m, &n,
+                    verb, m, n,
                 );
                 context
                     .env
@@ -2726,7 +2723,7 @@ fn resolve_field(context: &mut Context, loc: Loc, ty: Type, field: &Field) -> Ty
                     let msg = format!(
                         "Invalid access of field '{}' on '{}::{}'. Fields can only be accessed on \
                          structs, not enums",
-                        field, &m, &n
+                        field, m, n
                     );
                     context
                         .env
@@ -2789,7 +2786,7 @@ fn add_struct_field_types<T>(
             None => {
                 context.env.add_diag(diag!(
                     NameResolution::UnboundField,
-                    (loc, format!("Unbound field '{}' in '{}::{}'", &f, m, n))
+                    (loc, format!("Unbound field '{}' in '{}::{}'", f, m, n))
                 ));
                 context.error_type(f.loc())
             }
@@ -2846,7 +2843,7 @@ fn add_variant_field_types<T>(
                     NameResolution::UnboundField,
                     (
                         loc,
-                        format!("Unbound field '{}' in '{}::{}::{}'", &f, m, n, v)
+                        format!("Unbound field '{}' in '{}::{}::{}'", f, m, n, v)
                     )
                 ));
                 context.error_type(f.loc())
@@ -3026,15 +3023,14 @@ fn process_exp_dotted(
                 Type_::Ref(false, inner) => (BaseRefKind::MutRef, *inner.clone()),
                 _ => (BaseRefKind::Owned, base.ty.clone()),
             };
-            if matches!(base_kind, BaseRefKind::Owned) {
-                if let Some(verb) = constraint_verb {
+            if matches!(base_kind, BaseRefKind::Owned)
+                && let Some(verb) = constraint_verb {
                     context.add_single_type_constraint(
                         dloc,
                         format!("Invalid {}", verb),
                         base_type.clone(),
                     );
                 }
-            }
             let accessors = vec![];
             ExpDotted {
                 loc: dloc,
@@ -3649,7 +3645,7 @@ fn module_call_impl(
     let (arguments, arg_tys) = call_args(
         context,
         loc,
-        || format!("Invalid call of '{}::{}'", &m, &f),
+        || format!("Invalid call of '{}::{}'", m, f),
         parameters.len(),
         argloc,
         args,
@@ -3659,7 +3655,7 @@ fn module_call_impl(
         let msg = || {
             format!(
                 "Invalid call of '{}::{}'. Invalid argument for parameter '{}'",
-                &m, &f, &param.value.name
+                m, f, param.value.name
             )
         };
         subtype(context, loc, msg, arg_ty, param_ty);
@@ -3782,7 +3778,7 @@ fn builtin_call(
     let (arguments, arg_tys) = call_args(
         context,
         loc,
-        || format!("Invalid call of '{}'", &b_),
+        || format!("Invalid call of '{}'", b_),
         params_ty.len(),
         argloc,
         args,
@@ -3793,7 +3789,7 @@ fn builtin_call(
         let msg = || {
             format!(
                 "Invalid call of '{}'. Invalid argument for parameter '{}'",
-                &b_, idx
+                b_, idx
             )
         };
         subtype(context, loc, msg, arg_ty, param_ty);
@@ -3823,7 +3819,7 @@ fn syntax_call_return_ty(
     check_call_target(context, loc, None, macro_, declared, f);
     // Next we take our args in question and get their types.
     let arg_tys = {
-        let msg = || format!("Invalid call of '{}::{}'", &m, &f);
+        let msg = || format!("Invalid call of '{}::{}'", m, f);
         let arity = parameters.len();
         make_arg_types(context, loc, msg, arity, argloc, tys)
     };
@@ -4067,7 +4063,7 @@ fn macro_call_impl(
     core::check_call_arity(
         context,
         loc,
-        || format!("Invalid call of '{}::{}'", &m, &f),
+        || format!("Invalid call of '{}::{}'", m, f),
         parameters.len(),
         argloc,
         args.len(),
@@ -4091,7 +4087,7 @@ fn macro_call_impl(
                 let msg = || {
                     format!(
                         "Invalid call of '{}::{}'. Invalid argument for parameter '{}'",
-                        &m, &f, &param.value.name
+                        m, f, param.value.name
                     )
                 };
                 subtype(context, loc, msg, e.ty.clone(), param_ty.clone());
@@ -4149,7 +4145,7 @@ fn expected_by_name_arg_type(
     let msg = || {
         format!(
             "Invalid call of '{}::{}'. Invalid argument for parameter '{}'",
-            m, &f, &param.value.name
+            m, f, param.value.name
         )
     };
     // We need to return the subtyped type to properly remove the `Anything` in the cases

@@ -1698,6 +1698,6 @@ pub fn parse_module_string(
     let mut tokens = Lexer::new(file_hash, input);
     tokens.advance()?;
     let unit = parse_module(&mut tokens)?;
-    consume_token(&mut tokens, Tok::EOF)?;
+    consume_token(&mut tokens, Tok::Eof)?;
     Ok(unit)
 }

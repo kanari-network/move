@@ -569,7 +569,7 @@ impl<'a> BytecodeGenerator<'a> {
         exact: bool,
     ) -> Option<AbstractState> {
         // Bytecode will never be generated this large
-        debug_assert!(bytecode.len() < usize::max_value());
+        debug_assert!(bytecode.len() < usize::MAX);
         debug!("**********************");
         debug!("State1: {}", state);
         debug!("Next instr: {:?}", instruction);

@@ -232,7 +232,7 @@ impl<'env> Context<'env> {
                     enum_indexed_variants.push((variant_name, vdef.index));
                     enum_variant_fields.add(variant_name, fields).unwrap();
                 }
-                enum_indexed_variants.sort_by(|(_, ndx0), (_, ndx1)| ndx0.cmp(ndx1));
+                enum_indexed_variants.sort_by_key(|(_, ndx0)| *ndx0);
                 cur_enums_variants
                     .add(
                         ename,
@@ -817,7 +817,7 @@ fn struct_fields(context: &mut Context, tfields: N::StructFields) -> H::StructFi
         .into_iter()
         .map(|(f, (idx, t))| (idx, (f, base_type(context, t))))
         .collect::<Vec<_>>();
-    indexed_fields.sort_by(|(idx1, _), (idx2, _)| idx1.cmp(idx2));
+    indexed_fields.sort_by_key(|(idx1, _)| *idx1);
     H::StructFields::Defined(indexed_fields.into_iter().map(|(_, f_ty)| f_ty).collect())
 }
 
@@ -864,7 +864,7 @@ fn variant_fields(context: &mut Context, tfields: N::VariantFields) -> Vec<(Fiel
         .into_iter()
         .map(|(f, (idx, t))| (idx, (f, base_type(context, t))))
         .collect::<Vec<_>>();
-    indexed_fields.sort_by(|(idx1, _), (idx2, _)| idx1.cmp(idx2));
+    indexed_fields.sort_by_key(|(idx1, _)| *idx1);
     indexed_fields.into_iter().map(|(_, f_ty)| f_ty).collect()
 }
 
@@ -1596,7 +1596,7 @@ fn value(
                         .map(|(ndx, (f, (exp_idx, (bt, tf))))| (ndx, f, exp_idx, bt, tf))
                         .collect()
                 };
-            texp_fields.sort_by(|(_, _, eidx1, _, _), (_, _, eidx2, _, _)| eidx1.cmp(eidx2));
+            texp_fields.sort_by_key(|(_, _, eidx1, _, _)| *eidx1);
 
             let reorder_fields = texp_fields
                 .iter()
@@ -1673,7 +1673,7 @@ fn value(
                         .map(|(ndx, (f, (exp_idx, (bt, tf))))| (ndx, f, exp_idx, bt, tf))
                         .collect()
                 };
-            texp_fields.sort_by(|(_, _, eidx1, _, _), (_, _, eidx2, _, _)| eidx1.cmp(eidx2));
+            texp_fields.sort_by_key(|(_, _, eidx1, _, _)| *eidx1);
 
             let reorder_fields = texp_fields
                 .iter()
@@ -2590,7 +2590,7 @@ fn assign_struct_fields(
             })
             .collect(),
     };
-    tfields_vec.sort_by(|(idx1, _, _, _), (idx2, _, _, _)| idx1.cmp(idx2));
+    tfields_vec.sort_by_key(|(idx1, _, _, _)| *idx1);
     tfields_vec
 }
 
@@ -2620,7 +2620,7 @@ fn assign_variant_fields(
             })
             .collect(),
     };
-    tfields_vec.sort_by(|(idx1, _, _, _), (idx2, _, _, _)| idx1.cmp(idx2));
+    tfields_vec.sort_by_key(|(idx1, _, _, _)| *idx1);
     tfields_vec
 }
 

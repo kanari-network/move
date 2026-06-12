@@ -688,12 +688,8 @@ fn ast_exp_to_ide_string(exp: &Exp) -> Option<String> {
         UE::UnaryExp(op, exp) => ast_exp_to_ide_string(exp).map(|s| format!("{op}{s}")),
 
         UE::BinopExp(lexp, op, _, rexp) => {
-            let Some(ls) = ast_exp_to_ide_string(lexp) else {
-                return None;
-            };
-            let Some(rs) = ast_exp_to_ide_string(rexp) else {
-                return None;
-            };
+            let ls = ast_exp_to_ide_string(lexp)?;
+            let rs = ast_exp_to_ide_string(rexp)?;
             Some(format!("{ls} {op} {rs}"))
         }
         _ => None,
@@ -1046,12 +1042,8 @@ impl Symbols {
     }
 
     pub fn mod_defs(&self, fhash: &FileHash, mod_ident: ModuleIdent_) -> Option<&ModuleDefs> {
-        let Some(fpath) = self.file_name_mapping.get(fhash) else {
-            return None;
-        };
-        let Some(mod_defs) = self.file_mods.get(fpath) else {
-            return None;
-        };
+        let fpath = self.file_name_mapping.get(fhash)?;
+        let mod_defs = self.file_mods.get(fpath)?;
         mod_defs.iter().find(|d| d.ident == mod_ident)
     }
 }
@@ -2733,7 +2725,7 @@ impl<'a> TypingSymbolicator<'a> {
             .get(&expansion_mod_ident_to_map_key(&mod_ident.value))
             .unwrap();
 
-        if mod_def.functions.get(&mod_call.name.value()).is_none() {
+        if !mod_def.functions.contains_key(&mod_call.name.value()) {
             return;
         }
 
@@ -3338,13 +3330,9 @@ fn extract_doc_string(
     name_start: &Position,
     file_hash: &FileHash,
 ) -> Option<String> {
-    let Some(file_id) = file_id_mapping.get(file_hash) else {
-        return None;
-    };
+    let file_id = file_id_mapping.get(file_hash)?;
 
-    let Some(file_lines) = file_id_to_lines.get(file_id) else {
-        return None;
-    };
+    let file_lines = file_id_to_lines.get(file_id)?;
 
     if name_start.line == 0 {
         return None;

@@ -369,9 +369,9 @@ fn default_aliases(context: &mut Context) -> AliasMapBuilder {
         );
     }
     // if sui is defined and the current package is in Sui mode, add implicit sui aliases
-    if sui_address.is_some() && context.env().package_config(current_package).flavor == Flavor::Sui
+    if let Some(sui_address) = sui_address
+        && context.env().package_config(current_package).flavor == Flavor::Sui
     {
-        let sui_address = sui_address.unwrap();
         modules.extend(
             IMPLICIT_SUI_MODULES
                 .iter()
@@ -534,10 +534,10 @@ pub fn program(
     // Finalization
     //
     for (mident, module) in lib_module_map {
-        if let Err((mident, old_loc)) = source_module_map.add(mident, module) {
-            if !context.env().flags().sources_shadow_deps() {
-                duplicate_module(&mut context, &source_module_map, mident, old_loc)
-            }
+        if let Err((mident, old_loc)) = source_module_map.add(mident, module)
+            && !context.env().flags().sources_shadow_deps()
+        {
+            duplicate_module(&mut context, &source_module_map, mident, old_loc)
         }
     }
     let module_map = source_module_map;
@@ -828,7 +828,7 @@ fn module_(
     assert!(address.is_none());
     set_module_address(context, &name, module_address);
     let _ = check_restricted_name_all_cases(&mut context.defn_context, NameCase::Module, &name.0);
-    if name.value().starts_with(|c| c == '_') {
+    if name.value().starts_with('_') {
         let msg = format!(
             "Invalid module name '{}'. Module names cannot start with '_'",
             name,
@@ -974,7 +974,7 @@ fn check_visibility_modifiers(
     }
 
     // Emit any errors.
-    if public_package_usage.is_some() && friend_usage.is_some() {
+    if let (Some(public_package_usage), Some(friend_usage)) = (public_package_usage, friend_usage) {
         let friend_error_msg = format!(
             "Cannot define 'friend' modules and use '{}' visibility in the same module",
             E::Visibility::PACKAGE
@@ -984,10 +984,7 @@ fn check_visibility_modifiers(
             context.env().add_diag(diag!(
                 Declarations::InvalidVisibilityModifier,
                 (friend.loc, friend_error_msg.clone()),
-                (
-                    public_package_usage.unwrap(),
-                    package_definition_msg.clone()
-                )
+                (public_package_usage, package_definition_msg.clone())
             ));
         }
         let package_error_msg = format!(
@@ -1006,10 +1003,7 @@ fn check_visibility_modifiers(
                     context.env().add_diag(diag!(
                         Declarations::InvalidVisibilityModifier,
                         (loc, friend_error_msg.clone()),
-                        (
-                            public_package_usage.unwrap(),
-                            package_definition_msg.clone()
-                        )
+                        (public_package_usage, package_definition_msg.clone())
                     ));
                 }
                 E::Visibility::Package(loc) => {
@@ -1017,7 +1011,7 @@ fn check_visibility_modifiers(
                         Declarations::InvalidVisibilityModifier,
                         (loc, package_error_msg.clone()),
                         (
-                            friend_usage.unwrap(),
+                            friend_usage,
                             &format!("'{}' visibility used here", E::Visibility::FRIEND_IDENT)
                         )
                     ));
@@ -2349,10 +2343,10 @@ fn sequence(context: &mut Context, loc: Loc, seq: P::Sequence) -> E::Sequence {
             return None;
         }
         let seq_item = items.pop_front().unwrap();
-        if let E::SequenceItem_::Seq(exp) = &seq_item.value {
-            if exp.value == E::Exp_::UnresolvedError {
-                return Some(exp.clone());
-            }
+        if let E::SequenceItem_::Seq(exp) = &seq_item.value
+            && exp.value == E::Exp_::UnresolvedError
+        {
+            return Some(exp.clone());
         }
         items.push_front(seq_item);
         None
@@ -3695,7 +3689,7 @@ fn check_valid_module_member_name_impl(
     }
     match member {
         M::Function => {
-            if n.value.starts_with(|c| c == '_') {
+            if n.value.starts_with('_') {
                 let msg = format!(
                     "Invalid {} name '{}'. {} names cannot start with '_'",
                     case.name(),

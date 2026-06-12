@@ -1800,7 +1800,7 @@ impl IntegerValue {
         match self {
             U8(x) => Ok(x),
             U16(x) => {
-                if x > (std::u8::MAX as u16) {
+                if x > (u8::MAX as u16) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u16({}) to u8", x)))
                 } else {
@@ -1808,7 +1808,7 @@ impl IntegerValue {
                 }
             }
             U32(x) => {
-                if x > (std::u8::MAX as u32) {
+                if x > (u8::MAX as u32) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u32({}) to u8", x)))
                 } else {
@@ -1816,7 +1816,7 @@ impl IntegerValue {
                 }
             }
             U64(x) => {
-                if x > (std::u8::MAX as u64) {
+                if x > (u8::MAX as u64) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u64({}) to u8", x)))
                 } else {
@@ -1824,7 +1824,7 @@ impl IntegerValue {
                 }
             }
             U128(x) => {
-                if x > (std::u8::MAX as u128) {
+                if x > (u8::MAX as u128) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u128({}) to u8", x)))
                 } else {
@@ -1832,7 +1832,7 @@ impl IntegerValue {
                 }
             }
             U256(x) => {
-                if x > (u256::U256::from(std::u8::MAX)) {
+                if x > (u256::U256::from(u8::MAX)) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u256({}) to u8", x)))
                 } else {
@@ -1849,7 +1849,7 @@ impl IntegerValue {
             U8(x) => Ok(x as u16),
             U16(x) => Ok(x),
             U32(x) => {
-                if x > (std::u16::MAX as u32) {
+                if x > (u16::MAX as u32) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u32({}) to u16", x)))
                 } else {
@@ -1857,7 +1857,7 @@ impl IntegerValue {
                 }
             }
             U64(x) => {
-                if x > (std::u16::MAX as u64) {
+                if x > (u16::MAX as u64) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u64({}) to u16", x)))
                 } else {
@@ -1865,7 +1865,7 @@ impl IntegerValue {
                 }
             }
             U128(x) => {
-                if x > (std::u16::MAX as u128) {
+                if x > (u16::MAX as u128) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u128({}) to u16", x)))
                 } else {
@@ -1873,7 +1873,7 @@ impl IntegerValue {
                 }
             }
             U256(x) => {
-                if x > (u256::U256::from(std::u16::MAX)) {
+                if x > (u256::U256::from(u16::MAX)) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u256({}) to u16", x)))
                 } else {
@@ -1891,7 +1891,7 @@ impl IntegerValue {
             U16(x) => Ok(x as u32),
             U32(x) => Ok(x),
             U64(x) => {
-                if x > (std::u32::MAX as u64) {
+                if x > (u32::MAX as u64) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u64({}) to u32", x)))
                 } else {
@@ -1899,7 +1899,7 @@ impl IntegerValue {
                 }
             }
             U128(x) => {
-                if x > (std::u32::MAX as u128) {
+                if x > (u32::MAX as u128) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u128({}) to u32", x)))
                 } else {
@@ -1907,7 +1907,7 @@ impl IntegerValue {
                 }
             }
             U256(x) => {
-                if x > (u256::U256::from(std::u32::MAX)) {
+                if x > (u256::U256::from(u32::MAX)) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u128({}) to u32", x)))
                 } else {
@@ -1926,7 +1926,7 @@ impl IntegerValue {
             U32(x) => Ok(x as u64),
             U64(x) => Ok(x),
             U128(x) => {
-                if x > (std::u64::MAX as u128) {
+                if x > (u64::MAX as u128) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u128({}) to u64", x)))
                 } else {
@@ -1934,7 +1934,7 @@ impl IntegerValue {
                 }
             }
             U256(x) => {
-                if x > (u256::U256::from(std::u64::MAX)) {
+                if x > (u256::U256::from(u64::MAX)) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u256({}) to u64", x)))
                 } else {
@@ -1954,7 +1954,7 @@ impl IntegerValue {
             U64(x) => Ok(x as u128),
             U128(x) => Ok(x),
             U256(x) => {
-                if x > (u256::U256::from(std::u128::MAX)) {
+                if x > (u256::U256::from(u128::MAX)) {
                     Err(PartialVMError::new(StatusCode::ARITHMETIC_ERROR)
                         .with_message(format!("Cannot cast u256({}) to u128", x)))
                 } else {

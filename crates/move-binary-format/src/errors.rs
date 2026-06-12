@@ -376,9 +376,8 @@ impl fmt::Display for VMError {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-/// Conversion functions from internal VM statuses into external VM statuses
+// /// Conversion functions from internal VM statuses into external VM statuses
 ////////////////////////////////////////////////////////////////////////////
-
 pub fn offset_out_of_bounds(
     status: StatusCode,
     kind: IndexKind,

@@ -296,8 +296,8 @@ impl Move2024PathExpander {
             tyargs: &Option<Spanned<Vec<Type>>>,
             result: &NR,
         ) {
-            if let NR::Address(_, _) | NR::ModuleIdent(_, _) | NR::Variant(_, _, _) = result {
-                if let Some(tyargs) = tyargs {
+            if let NR::Address(_, _) | NR::ModuleIdent(_, _) | NR::Variant(_, _, _) = result
+                && let Some(tyargs) = tyargs {
                     let mut diag = diag!(
                         NameResolution::InvalidTypeParameter,
                         (
@@ -316,12 +316,11 @@ impl Move2024PathExpander {
                     }
                     context.env.add_diag(diag);
                 }
-            }
         }
 
         fn check_is_macro(context: &mut DefnContext, is_macro: &Option<Loc>, result: &NR) {
-            if let NR::Address(_, _) | NR::ModuleIdent(_, _) = result {
-                if let Some(loc) = is_macro {
+            if let NR::Address(_, _) | NR::ModuleIdent(_, _) = result
+                && let Some(loc) = is_macro {
                     context.env.add_diag(diag!(
                         NameResolution::InvalidTypeParameter,
                         (
@@ -330,7 +329,6 @@ impl Move2024PathExpander {
                         )
                     ));
                 }
-            }
         }
 
         match chain {

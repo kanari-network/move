@@ -132,8 +132,7 @@ impl SimpleAbsInt for CustomStateChangeVerifierAI {
         if let Some((_, _, fname)) = PRIVATE_OBJ_FUNCTIONS
             .iter()
             .find(|(addr, module, fun)| f.is(addr, module, fun))
-        {
-            if let Value::LocalObjWithStore(obj_addr_loc) = args[0] {
+            && let Value::LocalObjWithStore(obj_addr_loc) = args[0] {
                 let msg = format!(
                     "Potential unintended implementation of a custom {} function.",
                     fname
@@ -171,7 +170,6 @@ impl SimpleAbsInt for CustomStateChangeVerifierAI {
                 }
                 context.add_diag(d)
             }
-        }
         Some(match &return_ty.value {
             Type_::Unit => vec![],
             Type_::Single(_) => vec![Value::Other],
@@ -192,11 +190,10 @@ fn is_local_obj_with_store(sp!(_, st_): &SingleType, context: &CFGContext) -> bo
             // no store ability
             return false;
         }
-        if let TypeName_::ModuleType(mident, _) = tname {
-            if mident.value == context.module.value {
+        if let TypeName_::ModuleType(mident, _) = tname
+            && mident.value == context.module.value {
                 return true;
             }
-        }
     }
     false
 }

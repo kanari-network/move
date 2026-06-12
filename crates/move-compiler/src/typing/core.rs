@@ -728,7 +728,7 @@ impl ast_debug::AstDebug for Subst {
             let mut tvars = tvars.iter().collect::<Vec<_>>();
             tvars.sort_by_key(|(v, _)| *v);
             for (tvar, bt) in tvars {
-                w.write(&format!("{:?} => ", tvar));
+                w.write(format!("{:?} => ", tvar));
                 bt.ast_debug(w);
                 w.new_line();
             }
@@ -738,7 +738,7 @@ impl ast_debug::AstDebug for Subst {
             let mut num_vars = num_vars.keys().collect::<Vec<_>>();
             num_vars.sort();
             for tvar in num_vars {
-                w.writeln(&format!("{:?}", tvar))
+                w.writeln(format!("{:?}", tvar))
             }
         })
     }
@@ -1353,11 +1353,11 @@ pub fn make_function_type(
                     .package
                     .map(|pkg_name| format!("{}", pkg_name))
                     .unwrap_or("<unknown package>".to_string()),
-                &context
+                context
                     .current_module
                     .map(|cur_module| cur_module.value.address.to_string())
                     .unwrap_or("<unknown addr>".to_string()),
-                &context
+                context
                     .current_module
                     .and_then(|cur_module| context.module_info(&cur_module).package)
                     .map(|pkg_name| format!("{}", pkg_name))
@@ -1433,8 +1433,8 @@ fn visibility_error(
         (call_loc, call_msg),
         (vis_loc, vis_msg),
     );
-    if context.env.flags().is_testing() {
-        if let Some(case) = public_for_testing {
+    if context.env.flags().is_testing()
+        && let Some(case) = public_for_testing {
             let (test_loc, test_msg) = match case {
                 PublicForTesting::Entry(entry_loc) => {
                     let entry_msg = format!(
@@ -1449,7 +1449,6 @@ fn visibility_error(
             };
             diag.add_secondary_label((test_loc, test_msg))
         }
-    }
     context.env.add_diag(diag)
 }
 

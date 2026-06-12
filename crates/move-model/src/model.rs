@@ -63,8 +63,7 @@ use crate::{
 };
 
 // =================================================================================================
-/// # Constants
-
+/// # Constants///
 /// A name we use to represent a script as a module.
 pub const SCRIPT_MODULE_NAME: &str = "<SELF>";
 
@@ -83,8 +82,7 @@ const fn address_from_single_byte(b: u8) -> AccountAddress {
 }
 
 // =================================================================================================
-/// # Locations
-
+/// # Locations///
 /// A location, consisting of a FileId and a span in this file.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct Loc {
@@ -177,8 +175,7 @@ pub type MoveIrLoc = move_ir_types::location::Loc;
 /// and index based ids where we do have control (for modules, SpecFun and SpecVar).
 ///
 /// In any case, ids are opaque in the sense that if someone has a StructId or similar in hand,
-/// it is known to be defined in the environment, as it has been obtained also from the environment.
-
+/// it is known to be defined in the environment, as it has been obtained also from the environment.///
 /// Raw index type used in ids. 16 bits are sufficient currently.
 pub type RawIndex = u16;
 
@@ -374,8 +371,7 @@ impl QualifiedInstId<StructId> {
 }
 
 // =================================================================================================
-/// # Global Environment
-
+/// # Global Environment///
 /// Global environment for a set of modules.
 #[derive(Debug)]
 pub struct GlobalEnv {
@@ -1334,8 +1330,7 @@ impl Default for GlobalEnv {
 }
 
 // =================================================================================================
-/// # Module Environment
-
+/// # Module Environment///
 /// Represents data for a module.
 #[derive(Debug)]
 pub struct ModuleData {
@@ -2414,8 +2409,7 @@ impl<'env> NamedConstantEnv<'env> {
 }
 
 // =================================================================================================
-/// # Function Environment
-
+/// # Function Environment///
 /// Represents a type parameter.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct TypeParameter(pub Symbol, pub AbilityConstraint);
@@ -3136,8 +3130,7 @@ impl<'env> FunctionEnv<'env> {
 }
 
 // =================================================================================================
-/// # Expression Environment
-
+/// # Expression Environment///
 /// Represents context for an expression.
 #[derive(Debug, Clone)]
 pub struct ExpInfo {
@@ -3161,7 +3154,6 @@ impl ExpInfo {
 
 // =================================================================================================
 /// # Formatting
-
 pub struct LocDisplay<'env> {
     loc: &'env Loc,
     env: &'env GlobalEnv,
