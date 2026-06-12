@@ -24,7 +24,7 @@ struct Mixed {
     return_type: Option<SignatureToken>,
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn main() -> i32 {
     libfuzzer_sys::initialize(std::ptr::null(), std::ptr::null());
     0

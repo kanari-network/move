@@ -5,7 +5,7 @@
 use libfuzzer_sys::fuzz_target;
 use move_binary_format::file_format::CompiledModule;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn main() -> i32 {
     libfuzzer_sys::initialize(std::ptr::null(), std::ptr::null());
     0

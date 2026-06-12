@@ -10,7 +10,7 @@ use move_stdlib::move_stdlib_files;
 use move_unit_test::UnitTestingConfig;
 
 fn test_runner(path: &Path) -> datatest_stable::Result<()> {
-    env::set_var("NO_COLOR", "1");
+    unsafe { env::set_var("NO_COLOR", "1") };
 
     let source_files = vec![path.to_str().unwrap().to_owned()];
     let config = UnitTestingConfig {

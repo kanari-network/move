@@ -189,7 +189,7 @@ impl<'env> Docgen<'env> {
     }
 
     /// Generate document contents, returning pairs of output file names and generated contents.
-    pub fn gen(mut self) -> Vec<(String, String)> {
+    pub fn r#gen(mut self) -> Vec<(String, String)> {
         // If there is a root templates, parse them.
         let root_templates = self
             .options

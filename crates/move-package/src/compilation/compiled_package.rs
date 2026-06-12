@@ -758,7 +758,7 @@ impl CompiledPackage {
             ..DocgenOptions::default()
         };
         let docgen = Docgen::new(model, &doc_options);
-        docgen.gen()
+        docgen.r#gen()
     }
 }
 
