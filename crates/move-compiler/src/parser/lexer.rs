@@ -3,12 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    diag,
+    FileCommentMap, MatchedFileCommentMap, diag,
     diagnostics::Diagnostic,
-    editions::{create_feature_error, Edition, FeatureGate},
+    editions::{Edition, FeatureGate, create_feature_error},
     parser::{syntax::make_loc, token_set::TokenSet},
     shared::CompilationEnv,
-    FileCommentMap, MatchedFileCommentMap,
 };
 use move_command_line_common::{character_sets::DisplayChar, files::FileHash};
 use move_ir_types::location::Loc;

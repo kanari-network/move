@@ -645,10 +645,12 @@ impl Options {
         }
         if matches.contains_id("docgen-template") {
             options.run_docgen = true;
-            options.docgen.root_doc_templates = vec![matches
-                .get_one::<String>("docgen-template")
-                .map(|s| s.to_string())
-                .unwrap()]
+            options.docgen.root_doc_templates = vec![
+                matches
+                    .get_one::<String>("docgen-template")
+                    .map(|s| s.to_string())
+                    .unwrap(),
+            ]
         }
         if matches.get_flag("errmapgen") {
             options.run_errmapgen = true;

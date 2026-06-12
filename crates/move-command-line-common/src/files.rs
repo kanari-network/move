@@ -6,7 +6,7 @@ use anyhow::{anyhow, bail, *};
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use std::{collections::BTreeMap, path::Path};
-use vfs::{error::VfsErrorKind, VfsPath, VfsResult};
+use vfs::{VfsPath, VfsResult, error::VfsErrorKind};
 
 /// Result of sha256 hash of a file's contents.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
@@ -245,8 +245,8 @@ pub fn find_filenames_vfs<Predicate: FnMut(&VfsPath) -> bool>(
 ///   recursively in that directory
 /// - If `keep_specified_files` any file explicitly passed in `paths`, will be added to the result
 ///   Otherwise, they will be discarded
-/// It implements the same functionality as find_move_filenames above but for the virtual file
-/// system
+///   It implements the same functionality as find_move_filenames above but for the virtual file
+///   system
 pub fn find_move_filenames_vfs(
     paths: &[VfsPath],
     keep_specified_files: bool,

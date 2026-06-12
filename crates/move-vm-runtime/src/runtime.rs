@@ -11,9 +11,9 @@ use crate::{
     session::{LoadedFunctionInstantiation, SerializedReturnValues, Session},
 };
 use move_binary_format::{
-    errors::{verification_error, Location, PartialVMError, PartialVMResult, VMResult},
-    file_format::{AbilitySet, LocalIndex},
     CompiledModule, IndexKind,
+    errors::{Location, PartialVMError, PartialVMResult, VMResult, verification_error},
+    file_format::{AbilitySet, LocalIndex},
 };
 use move_bytecode_verifier::script_signature;
 use move_core_types::{

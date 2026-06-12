@@ -23,8 +23,8 @@ use crate::{
     unit_test,
 };
 use move_command_line_common::files::{
-    extension_equals, find_filenames_and_keep_specified, MOVE_COMPILED_EXTENSION, MOVE_EXTENSION,
-    SOURCE_MAP_EXTENSION,
+    MOVE_COMPILED_EXTENSION, MOVE_EXTENSION, SOURCE_MAP_EXTENSION, extension_equals,
+    find_filenames_and_keep_specified,
 };
 use move_core_types::language_storage::ModuleId as CompiledModuleId;
 use move_proc_macros::growing_stack;
@@ -37,9 +37,9 @@ use std::{
     sync::Arc,
 };
 use vfs::{
+    VfsPath,
     impls::{memory::MemoryFS, physical::PhysicalFS},
     path::VfsFileType,
-    VfsPath,
 };
 
 //**************************************************************************************************

@@ -1199,10 +1199,9 @@ impl<'env> FunctionContext<'env> {
                             follow_pointer_edge(trace.first().unwrap(), edge)
                         } else {
                             match edge {
-                                BorrowEdge::Hyper(hyper)
-                                    if hyper.len() == trace.len() => {
-                                        follow_pointer_trace(&trace, hyper)
-                                    }
+                                BorrowEdge::Hyper(hyper) if hyper.len() == trace.len() => {
+                                    follow_pointer_trace(&trace, hyper)
+                                }
                                 _ => false,
                             }
                         }

@@ -12,20 +12,20 @@ use move_ir_types::location::*;
 
 use crate::{
     cfgir::{
+        CFGContext, MemberName,
         absint::JoinResult,
         ast::Program,
         visitor::{
             LocalState, SimpleAbsInt, SimpleAbsIntConstructor, SimpleDomain, SimpleExecutionContext,
         },
-        CFGContext, MemberName,
     },
     diag,
     diagnostics::{
-        codes::{custom, DiagnosticInfo, Severity},
         Diagnostic, Diagnostics,
+        codes::{DiagnosticInfo, Severity, custom},
     },
     hlir::ast::{
-        BaseType_, Label, ModuleCall, SingleType, SingleType_, Type, TypeName_, Type_, Var,
+        BaseType_, Label, ModuleCall, SingleType, SingleType_, Type, Type_, TypeName_, Var,
     },
     parser::ast::Ability_,
     shared::{CompilationEnv, Identifier},
@@ -33,7 +33,7 @@ use crate::{
 use std::collections::BTreeMap;
 
 use super::{
-    LinterDiagCategory, FREEZE_FUN, INVALID_LOC, LINTER_DEFAULT_DIAG_CODE, LINT_WARNING_PREFIX,
+    FREEZE_FUN, INVALID_LOC, LINT_WARNING_PREFIX, LINTER_DEFAULT_DIAG_CODE, LinterDiagCategory,
     RECEIVE_FUN, SHARE_FUN, SUI_PKG_NAME, TRANSFER_FUN, TRANSFER_MOD_NAME,
 };
 
@@ -152,8 +152,10 @@ impl SimpleAbsInt for CustomStateChangeVerifierAI {
                                        the public_{fname} function which often negates the intent \
                                        of enforcing a custom {op} policy"
                 );
-                let note_msg = format!("A custom {op} policy for a given type is implemented through calling \
-                                       the private {fname} function variant in the module defining this type");
+                let note_msg = format!(
+                    "A custom {op} policy for a given type is implemented through calling \
+                                       the private {fname} function variant in the module defining this type"
+                );
                 let mut d = diag!(
                     CUSTOM_STATE_CHANGE_DIAG,
                     (self.fn_name_loc, msg),
@@ -161,7 +163,10 @@ impl SimpleAbsInt for CustomStateChangeVerifierAI {
                 );
                 d.add_note(note_msg);
                 if obj_addr_loc != INVALID_LOC {
-                    let loc_msg = format!("An instance of a module-private type with a store ability to be {} coming from here", action);
+                    let loc_msg = format!(
+                        "An instance of a module-private type with a store ability to be {} coming from here",
+                        action
+                    );
                     d.add_secondary_label((obj_addr_loc, loc_msg));
                 }
                 context.add_diag(d)

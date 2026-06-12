@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
+    FullyCompiledProgram,
     cfgir::{
         self,
         ast::{self as G, BasicBlock, BasicBlocks, BlockInfo},
@@ -13,8 +14,7 @@ use crate::{
     expansion::ast::{AbilitySet, Attributes, ModuleIdent, Mutability},
     hlir::ast::{self as H, BlockLabel, Label, Value, Value_, Var},
     parser::ast::{ConstantName, DatatypeName, FunctionName},
-    shared::{unique_map::UniqueMap, CompilationEnv},
-    FullyCompiledProgram,
+    shared::{CompilationEnv, unique_map::UniqueMap},
 };
 use cfgir::ast::LoopInfo;
 use move_core_types::{account_address::AccountAddress as MoveAddress, runtime_value::MoveValue};

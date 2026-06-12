@@ -7,9 +7,10 @@ use clap::Parser;
 use crossbeam::channel::{bounded, select};
 use lsp_server::{Connection, Message, Notification, Request, Response};
 use lsp_types::{
-    notification::Notification as _, request::Request as _, CompletionOptions, Diagnostic,
-    HoverProviderCapability, OneOf, SaveOptions, TextDocumentSyncCapability, TextDocumentSyncKind,
-    TextDocumentSyncOptions, TypeDefinitionProviderCapability, WorkDoneProgressOptions,
+    CompletionOptions, Diagnostic, HoverProviderCapability, OneOf, SaveOptions,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    TypeDefinitionProviderCapability, WorkDoneProgressOptions, notification::Notification as _,
+    request::Request as _,
 };
 use move_compiler::linters::LintLevel;
 use std::{
@@ -23,7 +24,7 @@ use move_analyzer::{
     vfs::on_text_document_sync_notification,
 };
 use url::Url;
-use vfs::{impls::memory::MemoryFS, VfsPath};
+use vfs::{VfsPath, impls::memory::MemoryFS};
 
 const LINT_NONE: &str = "none";
 const LINT_DEFAULT: &str = "default";
@@ -154,18 +155,17 @@ fn main() {
         // with diagnostics as they will be recomputed whenever the first source file is opened. The
         // main reason for this is to enable unit tests that rely on the symbolication information
         // to be available right after the client is initialized.
-        if let Some(uri) = initialize_params.root_uri {
-            if let Some(p) = symbols::SymbolicatorRunner::root_dir(&uri.to_file_path().unwrap()) {
-                if let Ok((Some(new_symbols), _)) = symbols::get_symbols(
-                    Arc::new(Mutex::new(BTreeMap::new())),
-                    ide_files_root.clone(),
-                    p.as_path(),
-                    lint,
-                ) {
-                    let mut old_symbols = symbols.lock().unwrap();
-                    (*old_symbols).merge(new_symbols);
-                }
-            }
+        if let Some(uri) = initialize_params.root_uri
+            && let Some(p) = symbols::SymbolicatorRunner::root_dir(&uri.to_file_path().unwrap())
+            && let Ok((Some(new_symbols), _)) = symbols::get_symbols(
+                Arc::new(Mutex::new(BTreeMap::new())),
+                ide_files_root.clone(),
+                p.as_path(),
+                lint,
+            )
+        {
+            let mut old_symbols = symbols.lock().unwrap();
+            (*old_symbols).merge(new_symbols);
         }
     };
 

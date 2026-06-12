@@ -11,18 +11,17 @@ use crate::{
         WellKnownFilterName,
     },
     shared::{
-        ast_debug::AstDebug, known_attributes, FILTER_UNUSED_CONST, FILTER_UNUSED_FUNCTION,
-        FILTER_UNUSED_MUT_PARAM, FILTER_UNUSED_MUT_REF, FILTER_UNUSED_STRUCT_FIELD,
-        FILTER_UNUSED_TYPE_PARAMETER,
+        FILTER_UNUSED_CONST, FILTER_UNUSED_FUNCTION, FILTER_UNUSED_MUT_PARAM,
+        FILTER_UNUSED_MUT_REF, FILTER_UNUSED_STRUCT_FIELD, FILTER_UNUSED_TYPE_PARAMETER,
+        ast_debug::AstDebug, known_attributes,
     },
 };
 use codespan_reporting::{
     self as csr,
     files::SimpleFiles,
     term::{
-        emit,
+        Config, emit,
         termcolor::{Buffer, ColorChoice, StandardStream, WriteColor},
-        Config,
     },
 };
 use csr::files::Files;
@@ -667,8 +666,7 @@ macro_rules! diag {
     }};
 }
 
-pub const ICE_BUG_REPORT_MESSAGE: &str =
-    "The Move compiler has encountered an internal compiler error.\n \
+pub const ICE_BUG_REPORT_MESSAGE: &str = "The Move compiler has encountered an internal compiler error.\n \
     Please report this this issue to the Mysten Labs Move language team,\n \
     including this error and any relevant code, to the Mysten Labs issue tracker\n \
     at : https://github.com/MystenLabs/sui/issues";

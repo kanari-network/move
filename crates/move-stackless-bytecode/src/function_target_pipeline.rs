@@ -5,7 +5,7 @@
 use core::fmt;
 use std::{
     cmp::Ordering,
-    collections::{btree_map::Entry as MapEntry, BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, btree_map::Entry as MapEntry},
     fmt::Formatter,
     fs,
 };

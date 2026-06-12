@@ -5,13 +5,13 @@
 use crate::{
     diagnostics::WarningFilters,
     expansion::ast::{
-        ability_constraints_ast_debug, ability_modifiers_ast_debug, AbilitySet, Attributes,
-        DottedUsage, Fields, Friend, ImplicitUseFunCandidate, ModuleIdent, Mutability, Value,
-        Value_, Visibility,
+        AbilitySet, Attributes, DottedUsage, Fields, Friend, ImplicitUseFunCandidate, ModuleIdent,
+        Mutability, Value, Value_, Visibility, ability_constraints_ast_debug,
+        ability_modifiers_ast_debug,
     },
     parser::ast::{
-        self as P, Ability_, BinOp, ConstantName, DatatypeName, Field, FunctionName, UnaryOp,
-        VariantName, ENTRY_MODIFIER, MACRO_MODIFIER, NATIVE_MODIFIER,
+        self as P, Ability_, BinOp, ConstantName, DatatypeName, ENTRY_MODIFIER, Field,
+        FunctionName, MACRO_MODIFIER, NATIVE_MODIFIER, UnaryOp, VariantName,
     },
     shared::{
         ast_debug::*, known_attributes::SyntaxAttribute, program_info::NamingProgramInfo,

@@ -5,14 +5,14 @@
 use crate::{
     diagnostics::WarningFilters,
     expansion::ast::{
-        ability_modifiers_ast_debug, AbilitySet, Attributes, Friend, ModuleIdent, Mutability,
+        AbilitySet, Attributes, Friend, ModuleIdent, Mutability, ability_modifiers_ast_debug,
     },
     naming::ast::{BuiltinTypeName, BuiltinTypeName_, DatatypeTypeParameter, TParam},
     parser::ast::{
-        self as P, BinOp, ConstantName, DatatypeName, Field, FunctionName, UnaryOp, VariantName,
-        ENTRY_MODIFIER,
+        self as P, BinOp, ConstantName, DatatypeName, ENTRY_MODIFIER, Field, FunctionName, UnaryOp,
+        VariantName,
     },
-    shared::{ast_debug::*, unique_map::UniqueMap, Name, NumericalAddress, TName},
+    shared::{Name, NumericalAddress, TName, ast_debug::*, unique_map::UniqueMap},
 };
 use move_ir_types::location::*;
 use move_symbol_pool::Symbol;

@@ -271,7 +271,10 @@ impl Type {
         match s {
             Struct(shi) => {
                 let s_handle = m.struct_handle_at(*shi);
-                assert!(s_handle.type_parameters.is_empty(), "A struct with N type parameters should be encoded as StructModuleInstantiation with type_arguments = [TypeParameter(1), ..., TypeParameter(N)]");
+                assert!(
+                    s_handle.type_parameters.is_empty(),
+                    "A struct with N type parameters should be encoded as StructModuleInstantiation with type_arguments = [TypeParameter(1), ..., TypeParameter(N)]"
+                );
                 let m_handle = m.module_handle_at(s_handle.module);
                 Type::Struct {
                     address: *m.address_identifier_at(m_handle.address),

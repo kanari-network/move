@@ -4,7 +4,7 @@
 
 use crate::format_module_id;
 use codespan_reporting::files::{Files, SimpleFiles};
-use colored::{control, Colorize};
+use colored::{Colorize, control};
 use move_binary_format::errors::{ExecutionState, Location, VMError, VMResult};
 use move_command_line_common::files::FileHash;
 use move_compiler::{

@@ -332,7 +332,7 @@ fn read_table(cursor: &mut VersionedCursor) -> BinaryLoaderResult<Table> {
         Ok(kind) => kind,
         Err(_) => {
             return Err(PartialVMError::new(StatusCode::MALFORMED)
-                .with_message("Error reading table".to_string()))
+                .with_message("Error reading table".to_string()));
         }
     };
     let table_offset = load_table_offset(cursor)?;
@@ -1077,7 +1077,7 @@ fn load_ability_set(
             Ok(byte) => byte,
             Err(_) => {
                 return Err(PartialVMError::new(StatusCode::MALFORMED)
-                    .with_message("Unexpected EOF".to_string()))
+                    .with_message("Unexpected EOF".to_string()));
             }
         };
         match pos {
@@ -1170,7 +1170,7 @@ fn load_struct_defs(
             Ok(byte) => SerializedNativeStructFlag::from_u8(byte)?,
             Err(_) => {
                 return Err(PartialVMError::new(StatusCode::MALFORMED)
-                    .with_message("Invalid field info in struct".to_string()))
+                    .with_message("Invalid field info in struct".to_string()));
             }
         };
         let field_information = match field_information_flag {
@@ -1385,14 +1385,15 @@ fn load_code(cursor: &mut VersionedCursor, code: &mut Vec<Bytecode>) -> BinaryLo
             | Opcodes::VEC_POP_BACK
             | Opcodes::VEC_UNPACK
             | Opcodes::VEC_SWAP
-                if cursor.version() < VERSION_4 => {
-                    return Err(
-                        PartialVMError::new(StatusCode::MALFORMED).with_message(format!(
-                            "Vector operations not available before bytecode version {}",
-                            VERSION_4
-                        )),
-                    );
-                }
+                if cursor.version() < VERSION_4 =>
+            {
+                return Err(
+                    PartialVMError::new(StatusCode::MALFORMED).with_message(format!(
+                        "Vector operations not available before bytecode version {}",
+                        VERSION_4
+                    )),
+                );
+            }
             _ => {}
         };
 

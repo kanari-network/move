@@ -279,7 +279,9 @@ fn context_specific_no_trigger(
             // the init function has a struct thats an one-time-witness candidate struct
             let otw_candidate = Symbol::from(mod_ident.module.value().to_uppercase());
             let init_snippet = if def_mdef.structs().contains_key(&otw_candidate) {
-                format!("{INIT_FN_NAME}(${{1:witness}}: {otw_candidate}, {sui_ctx_arg}) {{\n\t${{2:}}\n}}\n")
+                format!(
+                    "{INIT_FN_NAME}(${{1:witness}}: {otw_candidate}, {sui_ctx_arg}) {{\n\t${{2:}}\n}}\n"
+                )
             } else {
                 format!("{INIT_FN_NAME}({sui_ctx_arg}) {{\n\t${{1:}}\n}}\n")
             };
@@ -424,13 +426,12 @@ fn completion_items(
         .join(path.to_string_lossy())
         .unwrap()
         .open_file()
+        && f.read_to_string(&mut buffer).is_err()
     {
-        if f.read_to_string(&mut buffer).is_err() {
-            eprintln!(
-                "Could not read '{:?}' when handling completion request",
-                path
-            );
-        }
+        eprintln!(
+            "Could not read '{:?}' when handling completion request",
+            path
+        );
     }
     if !buffer.is_empty() {
         let mut only_custom_items = false;

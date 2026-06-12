@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    debug_display, debug_display_verbose, diag,
+    FullyCompiledProgram, debug_display, debug_display_verbose, diag,
     editions::{FeatureGate, Flavor},
     expansion::ast::{self as E, Fields, ModuleIdent, Mutability},
     hlir::{
@@ -18,7 +18,6 @@ use crate::{
     shared::{process_binops, unique_map::UniqueMap, *},
     sui_mode::ID_FIELD_NAME,
     typing::ast as T,
-    FullyCompiledProgram,
 };
 
 use move_ir_types::location::*;
@@ -965,7 +964,7 @@ fn single_type(context: &mut Context, sp!(loc, ty_): N::Type) -> H::SingleType {
 
 fn type_(context: &mut Context, sp!(loc, ty_): N::Type) -> H::Type {
     use H::Type_ as HT;
-    use N::{TypeName_ as TN, Type_ as NT};
+    use N::{Type_ as NT, TypeName_ as TN};
     let t_ = match ty_ {
         NT::Unit => HT::Unit,
         NT::Apply(None, _, _) => {
@@ -1172,11 +1171,7 @@ fn tail(
                     block: loop_body,
                 },
             ));
-            if has_break {
-                Some(result)
-            } else {
-                None
-            }
+            if has_break { Some(result) } else { None }
         }
         e_ @ E::Loop { .. } => {
             // A loop wthout a break has no concrete type for its binders, but since we'll never

@@ -6,14 +6,14 @@ mod state;
 
 use super::{
     absint::*,
-    cfg::{MutForwardCFG, MutReverseCFG, ReverseCFG, CFG},
+    cfg::{CFG, MutForwardCFG, MutReverseCFG, ReverseCFG},
     locals,
 };
 use crate::{
     diagnostics::Diagnostics,
     expansion::ast::Mutability,
     hlir::ast::{self as H, *},
-    shared::{unique_map::UniqueMap, CompilationEnv},
+    shared::{CompilationEnv, unique_map::UniqueMap},
 };
 use move_ir_types::location::*;
 use move_proc_macros::growing_stack;
@@ -195,7 +195,7 @@ mod last_usage {
         diag,
         hlir::{
             ast::*,
-            translate::{display_var, DisplayVar},
+            translate::{DisplayVar, display_var},
         },
         shared::*,
     };

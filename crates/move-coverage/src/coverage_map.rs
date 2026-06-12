@@ -4,7 +4,7 @@
 
 #![forbid(unsafe_code)]
 
-use anyhow::{format_err, Result};
+use anyhow::{Result, format_err};
 use move_binary_format::file_format::{CodeOffset, CompiledModule};
 use move_core_types::{
     account_address::AccountAddress,
@@ -224,7 +224,9 @@ impl ExecCoverageMap {
             })
             .collect();
 
-        let compiled_modules = modules.into_values().flat_map(|module_map| {
+        let compiled_modules = modules
+            .into_values()
+            .flat_map(|module_map| {
                 module_map
                     .into_iter()
                     .map(|(_, (module_path, compiled_module))| (module_path, compiled_module))

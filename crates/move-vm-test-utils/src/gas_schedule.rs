@@ -14,7 +14,7 @@ use move_binary_format::{
         FunctionHandleIndex, FunctionInstantiationIndex, SignatureIndex,
         StructDefInstantiationIndex, StructDefinitionIndex,
     },
-    file_format_common::{instruction_key, Opcodes},
+    file_format_common::{Opcodes, instruction_key},
 };
 use move_core_types::{
     gas_algebra::{

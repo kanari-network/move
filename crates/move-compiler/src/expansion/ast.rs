@@ -5,9 +5,9 @@
 use crate::{
     diagnostics::WarningFilters,
     parser::ast::{
-        self as P, Ability, Ability_, BinOp, BlockLabel, ConstantName, DatatypeName, Field,
-        FunctionName, ModuleName, QuantKind, UnaryOp, Var, VariantName, ENTRY_MODIFIER,
-        MACRO_MODIFIER, NATIVE_MODIFIER,
+        self as P, Ability, Ability_, BinOp, BlockLabel, ConstantName, DatatypeName,
+        ENTRY_MODIFIER, Field, FunctionName, MACRO_MODIFIER, ModuleName, NATIVE_MODIFIER,
+        QuantKind, UnaryOp, Var, VariantName,
     },
     shared::{
         ast_debug::*, known_attributes::KnownAttribute, unique_map::UniqueMap,

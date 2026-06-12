@@ -10,13 +10,13 @@ use std::collections::BTreeMap;
 use crate::{
     diag,
     diagnostics::{
-        codes::{custom, DiagnosticInfo, Severity},
         WarningFilters,
+        codes::{DiagnosticInfo, Severity, custom},
     },
     expansion::ast as E,
     naming::ast as N,
     parser::ast::{self as P, Ability_},
-    shared::{program_info::TypingProgramInfo, CompilationEnv, Identifier},
+    shared::{CompilationEnv, Identifier, program_info::TypingProgramInfo},
     typing::{
         ast as T,
         visitor::{TypingVisitorConstructor, TypingVisitorContext},
@@ -26,8 +26,8 @@ use move_ir_types::location::*;
 use move_symbol_pool::Symbol;
 
 use super::{
-    base_type, LinterDiagCategory, FREEZE_FUN, LINTER_DEFAULT_DIAG_CODE, LINT_WARNING_PREFIX,
-    PUBLIC_FREEZE_FUN, SUI_PKG_NAME, TRANSFER_MOD_NAME,
+    FREEZE_FUN, LINT_WARNING_PREFIX, LINTER_DEFAULT_DIAG_CODE, LinterDiagCategory,
+    PUBLIC_FREEZE_FUN, SUI_PKG_NAME, TRANSFER_MOD_NAME, base_type,
 };
 
 const FREEZE_WRAPPING_DIAG: DiagnosticInfo = custom(

@@ -261,7 +261,7 @@ impl<'env, 'translator, 'module_translator> ExpTranslator<'env, 'translator, 'mo
                             return check_zero_args(self, Type::new_prim(PrimitiveType::U128));
                         }
                         "u256" => {
-                            return check_zero_args(self, Type::new_prim(PrimitiveType::U256))
+                            return check_zero_args(self, Type::new_prim(PrimitiveType::U256));
                         }
                         "num" => return check_zero_args(self, Type::new_prim(PrimitiveType::Num)),
                         "range" => {

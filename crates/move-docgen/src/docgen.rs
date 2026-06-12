@@ -403,26 +403,22 @@ impl<'env> Docgen<'env> {
         }
         // Now process infos for all remaining modules.
         for m in self.env.get_modules() {
-            if !included.contains(&m.get_id()) {
-                if let Some(file_name) = self.compute_output_file(&m) {
-                    let info = ModuleInfo {
-                        target_file: file_name,
-                        label: self.make_label_for_module(&m),
-                        is_included: false,
-                    };
-                    log(&m, &info);
-                    self.infos.insert(m.get_id(), info);
-                }
+            if !included.contains(&m.get_id())
+                && let Some(file_name) = self.compute_output_file(&m)
+            {
+                let info = ModuleInfo {
+                    target_file: file_name,
+                    label: self.make_label_for_module(&m),
+                    is_included: false,
+                };
+                log(&m, &info);
+                self.infos.insert(m.get_id(), info);
             }
         }
     }
 
     fn module_modifier(name: &ModuleName) -> &str {
-        if name.is_script() {
-            "Script"
-        } else {
-            "Module"
-        }
+        if name.is_script() { "Script" } else { "Module" }
     }
 
     /// Computes file location for a module. This considers if the module is a dependency
@@ -452,11 +448,7 @@ impl<'env> Docgen<'env> {
                     let package_name = path.ancestors().find_map(|dir| {
                         let mut path = PathBuf::from(dir);
                         path.push("Move.toml");
-                        if path.exists() {
-                            dir.file_stem()
-                        } else {
-                            None
-                        }
+                        if path.exists() { dir.file_stem() } else { None }
                     });
                     package_name.map(|package_name| {
                         format!(
@@ -1227,10 +1219,15 @@ impl<'env> Docgen<'env> {
                     let code = chars.take_while_ref(non_code_filter).collect::<String>();
                     // consume the remaining '`'. Report an error if we find an unmatched '`'.
                     assert!(
-                                            chars.next() == Some('`'),
-                                            "Missing backtick found in {} while generating documentation for the following text: \"{}\"",
-                                            self.current_module.as_ref().unwrap().get_name().display_full(self.env.symbol_pool()), text,
-                                        );
+                        chars.next() == Some('`'),
+                        "Missing backtick found in {} while generating documentation for the following text: \"{}\"",
+                        self.current_module
+                            .as_ref()
+                            .unwrap()
+                            .get_name()
+                            .display_full(self.env.symbol_pool()),
+                        text,
+                    );
 
                     write!(
                         &mut decorated_text,
@@ -1506,7 +1503,7 @@ impl<'env> Docgen<'env> {
 
     /// Display a type parameter.
     fn type_parameter_display(&self, tp: &TypeParameter) -> String {
-        let ability_tokens = self.ability_tokens(tp.1 .0);
+        let ability_tokens = self.ability_tokens(tp.1.0);
         if ability_tokens.is_empty() {
             self.name_string(tp.0).to_string()
         } else {

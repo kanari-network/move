@@ -9,7 +9,7 @@ use crate::{
         BaseType, Command, Command_, EnumDefinition, FunctionSignature, Label, SingleType,
         StructDefinition, Var, Visibility,
     },
-    parser::ast::{ConstantName, DatatypeName, FunctionName, ENTRY_MODIFIER},
+    parser::ast::{ConstantName, DatatypeName, ENTRY_MODIFIER, FunctionName},
     shared::{ast_debug::*, unique_map::UniqueMap},
 };
 use move_core_types::runtime_value::MoveValue;

@@ -8,8 +8,8 @@ use crate::coverage_map::CoverageMap;
 use codespan::{Files, Span};
 use colored::*;
 use move_binary_format::{
-    file_format::{CodeOffset, FunctionDefinitionIndex},
     CompiledModule,
+    file_format::{CodeOffset, FunctionDefinitionIndex},
 };
 use move_bytecode_source_map::source_map::SourceMap;
 use move_core_types::identifier::Identifier;

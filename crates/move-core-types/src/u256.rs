@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use ethnum::U256 as EthnumU256;
-use num::{bigint::Sign, BigInt};
+use num::{BigInt, bigint::Sign};
 #[cfg(any(test, feature = "fuzzing"))]
 use proptest::strategy::BoxedStrategy;
 use rand::{
-    distributions::{
-        uniform::{SampleUniform, UniformSampler},
-        Distribution, Standard,
-    },
     Rng,
+    distributions::{
+        Distribution, Standard,
+        uniform::{SampleUniform, UniformSampler},
+    },
 };
 use std::{
     fmt,

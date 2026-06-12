@@ -7,6 +7,7 @@ use move_command_line_common::testing::{
     add_update_baseline_fix, format_diff, read_env_update_baseline,
 };
 use move_package::{
+    BuildConfig, ModelConfig,
     compilation::{
         build_plan::BuildPlan, compiled_package::CompiledPackageInfo, model_builder::ModelBuilder,
     },
@@ -15,7 +16,6 @@ use move_package::{
     package_hooks::PackageIdentifier,
     resolution::resolution_graph::Package,
     source_package::parsed_manifest::{CustomDepInfo, PackageDigest, SourceManifest},
-    BuildConfig, ModelConfig,
 };
 use move_symbol_pool::Symbol;
 use std::{
@@ -23,7 +23,7 @@ use std::{
     fs,
     path::{Path, PathBuf},
 };
-use tempfile::{tempdir, TempDir};
+use tempfile::{TempDir, tempdir};
 
 const EXTENSIONS: &[&str] = &[
     "progress",

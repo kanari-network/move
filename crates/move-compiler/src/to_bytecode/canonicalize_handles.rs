@@ -4,13 +4,13 @@
 use std::collections::HashMap;
 
 use move_binary_format::{
+    CompiledModule,
     file_format::{
         Bytecode, CodeUnit, FunctionDefinition, FunctionDefinitionIndex, FunctionHandleIndex,
         IdentifierIndex, ModuleHandleIndex, Signature, SignatureToken, StructDefinition,
         StructDefinitionIndex, StructFieldInformation, StructHandleIndex, TableIndex,
     },
     internals::ModuleIndex,
-    CompiledModule,
 };
 use move_core_types::account_address::AccountAddress;
 use move_symbol_pool::Symbol;

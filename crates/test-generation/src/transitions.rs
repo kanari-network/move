@@ -16,7 +16,7 @@ use move_binary_format::file_format::{
 };
 
 use move_binary_format::file_format::TableIndex;
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::{HashMap, hash_map::Entry};
 
 //---------------------------------------------------------------------------
 // Type Instantiations from Unification with the Abstract Stack
@@ -299,9 +299,10 @@ pub fn stack_has_polymorphic_eq(state: &AbstractState, index1: usize, index2: us
 /// same type
 pub fn stack_local_polymorphic_eq(state: &AbstractState, index1: usize, index2: usize) -> bool {
     if stack_has(state, index1, None)
-        && let Some((abstract_value, _)) = state.local_get(index2) {
-            return state.stack_peek(index1) == Some(abstract_value.clone());
-        }
+        && let Some((abstract_value, _)) = state.local_get(index2)
+    {
+        return state.stack_peek(index1) == Some(abstract_value.clone());
+    }
     false
 }
 
@@ -321,30 +322,31 @@ pub fn local_availability_is(state: &AbstractState, index: u8, availability: Bor
 /// same type as another abstract value on the stack
 pub fn stack_ref_polymorphic_eq(state: &AbstractState, index1: usize, index2: usize) -> bool {
     if stack_has(state, index2, None)
-        && let Some(abstract_value) = state.stack_peek(index1) {
-            match abstract_value.token {
-                SignatureToken::MutableReference(token) | SignatureToken::Reference(token) => {
-                    let abstract_value_inner = AbstractValue {
-                        token: (*token).clone(),
-                        abilities: abilities_for_token(state, &token, &state.instantiation[..]),
-                    };
-                    return Some(abstract_value_inner) == state.stack_peek(index2);
-                }
-                SignatureToken::Bool
-                | SignatureToken::U8
-                | SignatureToken::U64
-                | SignatureToken::U128
-                | SignatureToken::Address
-                | SignatureToken::Signer
-                | SignatureToken::Vector(_)
-                | SignatureToken::Struct(_)
-                | SignatureToken::StructInstantiation(_)
-                | SignatureToken::TypeParameter(_)
-                | SignatureToken::U16
-                | SignatureToken::U32
-                | SignatureToken::U256 => return false,
+        && let Some(abstract_value) = state.stack_peek(index1)
+    {
+        match abstract_value.token {
+            SignatureToken::MutableReference(token) | SignatureToken::Reference(token) => {
+                let abstract_value_inner = AbstractValue {
+                    token: (*token).clone(),
+                    abilities: abilities_for_token(state, &token, &state.instantiation[..]),
+                };
+                return Some(abstract_value_inner) == state.stack_peek(index2);
             }
+            SignatureToken::Bool
+            | SignatureToken::U8
+            | SignatureToken::U64
+            | SignatureToken::U128
+            | SignatureToken::Address
+            | SignatureToken::Signer
+            | SignatureToken::Vector(_)
+            | SignatureToken::Struct(_)
+            | SignatureToken::StructInstantiation(_)
+            | SignatureToken::TypeParameter(_)
+            | SignatureToken::U16
+            | SignatureToken::U32
+            | SignatureToken::U256 => return false,
         }
+    }
     false
 }
 
@@ -556,32 +558,33 @@ pub fn get_struct_instantiation_for_state(
 /// or `None` to just check that there is a a struct.
 pub fn stack_has_struct(state: &AbstractState, struct_index: StructDefinitionIndex) -> bool {
     if state.stack_len() > 0
-        && let Some(struct_value) = state.stack_peek(0) {
-            match struct_value.token {
-                SignatureToken::Struct(struct_handle) => {
-                    let struct_def = state.module.module.struct_def_at(struct_index);
-                    return struct_handle == struct_def.struct_handle;
-                }
-                SignatureToken::StructInstantiation(struct_inst) => {
-                    let (struct_handle, _) = *struct_inst;
-                    let struct_def = state.module.module.struct_def_at(struct_index);
-                    return struct_handle == struct_def.struct_handle;
-                }
-                SignatureToken::Bool
-                | SignatureToken::U8
-                | SignatureToken::U64
-                | SignatureToken::U128
-                | SignatureToken::Address
-                | SignatureToken::Signer
-                | SignatureToken::Vector(_)
-                | SignatureToken::Reference(_)
-                | SignatureToken::MutableReference(_)
-                | SignatureToken::TypeParameter(_)
-                | SignatureToken::U16
-                | SignatureToken::U32
-                | SignatureToken::U256 => return false,
+        && let Some(struct_value) = state.stack_peek(0)
+    {
+        match struct_value.token {
+            SignatureToken::Struct(struct_handle) => {
+                let struct_def = state.module.module.struct_def_at(struct_index);
+                return struct_handle == struct_def.struct_handle;
             }
+            SignatureToken::StructInstantiation(struct_inst) => {
+                let (struct_handle, _) = *struct_inst;
+                let struct_def = state.module.module.struct_def_at(struct_index);
+                return struct_handle == struct_def.struct_handle;
+            }
+            SignatureToken::Bool
+            | SignatureToken::U8
+            | SignatureToken::U64
+            | SignatureToken::U128
+            | SignatureToken::Address
+            | SignatureToken::Signer
+            | SignatureToken::Vector(_)
+            | SignatureToken::Reference(_)
+            | SignatureToken::MutableReference(_)
+            | SignatureToken::TypeParameter(_)
+            | SignatureToken::U16
+            | SignatureToken::U32
+            | SignatureToken::U256 => return false,
         }
+    }
     false
 }
 
@@ -653,33 +656,34 @@ pub fn stack_struct_has_field(state: &AbstractState, field_index: FieldHandleInd
 /// If `mutable` is `Either` then the reference can be either mutable or immutable
 pub fn stack_has_reference(state: &AbstractState, index: usize, mutability: Mutability) -> bool {
     if state.stack_len() > index
-        && let Some(abstract_value) = state.stack_peek(index) {
-            match abstract_value.token {
-                SignatureToken::MutableReference(_) => {
-                    if mutability == Mutability::Mutable || mutability == Mutability::Either {
-                        return true;
-                    }
+        && let Some(abstract_value) = state.stack_peek(index)
+    {
+        match abstract_value.token {
+            SignatureToken::MutableReference(_) => {
+                if mutability == Mutability::Mutable || mutability == Mutability::Either {
+                    return true;
                 }
-                SignatureToken::Reference(_) => {
-                    if mutability == Mutability::Immutable || mutability == Mutability::Either {
-                        return true;
-                    }
-                }
-                SignatureToken::Bool
-                | SignatureToken::U8
-                | SignatureToken::U64
-                | SignatureToken::U128
-                | SignatureToken::Address
-                | SignatureToken::Signer
-                | SignatureToken::Vector(_)
-                | SignatureToken::Struct(_)
-                | SignatureToken::StructInstantiation(_)
-                | SignatureToken::TypeParameter(_)
-                | SignatureToken::U16
-                | SignatureToken::U32
-                | SignatureToken::U256 => return false,
             }
+            SignatureToken::Reference(_) => {
+                if mutability == Mutability::Immutable || mutability == Mutability::Either {
+                    return true;
+                }
+            }
+            SignatureToken::Bool
+            | SignatureToken::U8
+            | SignatureToken::U64
+            | SignatureToken::U128
+            | SignatureToken::Address
+            | SignatureToken::Signer
+            | SignatureToken::Vector(_)
+            | SignatureToken::Struct(_)
+            | SignatureToken::StructInstantiation(_)
+            | SignatureToken::TypeParameter(_)
+            | SignatureToken::U16
+            | SignatureToken::U32
+            | SignatureToken::U256 => return false,
         }
+    }
     false
 }
 

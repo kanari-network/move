@@ -4,10 +4,11 @@
 
 use std::collections::HashMap;
 
-use anyhow::{bail, format_err, Result};
+use anyhow::{Result, bail, format_err};
 use clap::Parser;
 use colored::*;
 use move_binary_format::{
+    CompiledModule,
     control_flow_graph::{ControlFlowGraph, VMControlFlowGraph},
     file_format::{
         Ability, AbilitySet, Bytecode, CodeUnit, Constant, FieldHandleIndex, FunctionDefinition,
@@ -15,7 +16,6 @@ use move_binary_format::{
         SignatureToken, StructDefinition, StructDefinitionIndex, StructFieldInformation,
         StructTypeParameter, TableIndex, TypeSignature, Visibility,
     },
-    CompiledModule,
 };
 use move_bytecode_source_map::{
     mapping::SourceMapping,

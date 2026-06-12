@@ -6,15 +6,16 @@ use std::{collections::BTreeMap, fs, path::Path};
 
 use move_command_line_common::{
     env::read_bool_env_var,
-    testing::{add_update_baseline_fix, format_diff, read_env_update_baseline, EXP_EXT, OUT_EXT},
+    testing::{EXP_EXT, OUT_EXT, add_update_baseline_fix, format_diff, read_env_update_baseline},
 };
 use move_compiler::{
+    Compiler, PASS_PARSER,
     command_line::compiler::move_check_for_errors,
     diagnostics::*,
     editions::{Edition, Flavor},
     linters::{self, LintLevel},
     shared::{Flags, NumericalAddress, PackageConfig, PackagePaths},
-    sui_mode, Compiler, PASS_PARSER,
+    sui_mode,
 };
 
 /// Shared flag to keep any temporary results of the test

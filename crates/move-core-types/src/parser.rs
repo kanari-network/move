@@ -8,7 +8,7 @@ use crate::{
     language_storage::{StructTag, TypeTag},
     transaction_argument::TransactionArgument,
 };
-use anyhow::{bail, format_err, Result};
+use anyhow::{Result, bail, format_err};
 use std::iter::Peekable;
 
 #[derive(Eq, PartialEq, Debug)]

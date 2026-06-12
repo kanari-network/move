@@ -7,13 +7,13 @@ use anyhow::Result;
 use clap::*;
 use move_command_line_common::files::{FileHash, MOVE_COVERAGE_MAP_EXTENSION};
 use move_compiler::{
+    PASS_CFGIR,
     diagnostics::{self, Diagnostics},
     shared::{NumberFormat, NumericalAddress},
-    unit_test::{plan_builder::construct_test_plan, TestPlan},
-    PASS_CFGIR,
+    unit_test::{TestPlan, plan_builder::construct_test_plan},
 };
-use move_coverage::coverage_map::{output_map_to_file, CoverageMap};
-use move_package::{compilation::build_plan::BuildPlan, BuildConfig};
+use move_coverage::coverage_map::{CoverageMap, output_map_to_file};
+use move_package::{BuildConfig, compilation::build_plan::BuildPlan};
 use move_unit_test::UnitTestingConfig;
 use move_vm_test_utils::gas_schedule::CostTable;
 use std::{
@@ -162,7 +162,9 @@ pub fn run_move_unit_tests<W: Write + Send>(
     // Get the source files for all modules. We need this in order to report source-mapped error
     // messages.
     let dep_file_map: HashMap<_, _> = resolution_graph
-        .package_table.values().flat_map(|rpkg| {
+        .package_table
+        .values()
+        .flat_map(|rpkg| {
             rpkg.get_sources(&resolution_graph.build_options)
                 .unwrap()
                 .iter()

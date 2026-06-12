@@ -6,12 +6,12 @@ use crate::{
     cfgir::visitor::{AbsIntVisitorObj, AbstractInterpreterVisitor},
     command_line as cli,
     diagnostics::{
-        codes::{Category, Declarations, DiagnosticsID, Severity, WarningFilter},
         Diagnostic, Diagnostics, FileName, MappedFiles, WarningFilters,
+        codes::{Category, Declarations, DiagnosticsID, Severity, WarningFilter},
     },
     editions::{
-        check_feature_or_error as edition_check_feature, feature_edition_error_msg, Edition,
-        FeatureGate, Flavor,
+        Edition, FeatureGate, Flavor, check_feature_or_error as edition_check_feature,
+        feature_edition_error_msg,
     },
     expansion::ast as E,
     naming::ast as N,
@@ -30,8 +30,8 @@ use std::{
     hash::Hash,
     rc::Rc,
     sync::{
-        atomic::{AtomicUsize, Ordering as AtomicOrdering},
         Arc,
+        atomic::{AtomicUsize, Ordering as AtomicOrdering},
     },
 };
 use vfs::{VfsError, VfsPath};
@@ -50,8 +50,8 @@ pub use ast_debug::AstDebug;
 //**************************************************************************************************
 
 pub use move_command_line_common::parser::{
-    parse_address_number as parse_address, parse_u128, parse_u16, parse_u256, parse_u32, parse_u64,
-    parse_u8, NumberFormat,
+    NumberFormat, parse_address_number as parse_address, parse_u8, parse_u16, parse_u32, parse_u64,
+    parse_u128, parse_u256,
 };
 
 //**************************************************************************************************
@@ -454,10 +454,12 @@ impl CompilationEnv {
     /// Should only be called after compilation is finished
     pub fn take_final_warning_diags(&mut self) -> Diagnostics {
         let final_diags = self.take_final_diags();
-        debug_assert!(final_diags
-            .max_severity()
-            .map(|s| s == Severity::Warning)
-            .unwrap_or(true));
+        debug_assert!(
+            final_diags
+                .max_severity()
+                .map(|s| s == Severity::Warning)
+                .unwrap_or(true)
+        );
         final_diags
     }
 

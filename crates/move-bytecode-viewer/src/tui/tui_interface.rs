@@ -7,10 +7,10 @@ use crate::tui::TUI;
 use crossterm::{
     event::EnableMouseCapture,
     execute,
-    terminal::{enable_raw_mode, EnterAlternateScreen},
+    terminal::{EnterAlternateScreen, enable_raw_mode},
 };
 use std::{error::Error, io};
-use tui::{backend::CrosstermBackend, text::Spans, Terminal};
+use tui::{Terminal, backend::CrosstermBackend, text::Spans};
 
 /// The output that will be display in the TUI. The text in the `left_screen` and `right_screen`
 /// fields will be displayed on the left screen and right screen respectively.

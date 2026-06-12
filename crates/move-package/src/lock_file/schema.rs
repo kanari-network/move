@@ -10,7 +10,7 @@ use std::{
     io::{Read, Seek, Write},
 };
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 use toml::value::Value;
@@ -352,7 +352,7 @@ pub fn update_managed_address(
     environment: &str,
     managed_address_update: ManagedAddressUpdate,
 ) -> Result<()> {
-    use toml_edit::{value, Document, Table};
+    use toml_edit::{Document, Table, value};
 
     let mut toml_string = String::new();
     file.read_to_string(&mut toml_string)?;
@@ -380,10 +380,14 @@ pub fn update_managed_address(
         }
         ManagedAddressUpdate::Upgraded { latest_id, version } => {
             if !env_table.contains_key(CHAIN_ID_KEY) {
-                bail!("Move.lock violation: attempted address update for package upgrade when no {CHAIN_ID_KEY} exists")
+                bail!(
+                    "Move.lock violation: attempted address update for package upgrade when no {CHAIN_ID_KEY} exists"
+                )
             }
             if !env_table.contains_key(ORIGINAL_PUBLISHED_ID_KEY) {
-                bail!("Move.lock violation: attempted address update for package upgrade when no {ORIGINAL_PUBLISHED_ID_KEY} exists")
+                bail!(
+                    "Move.lock violation: attempted address update for package upgrade when no {ORIGINAL_PUBLISHED_ID_KEY} exists"
+                )
             }
             env_table[LATEST_PUBLISHED_ID_KEY] = value(latest_id);
             env_table[PUBLISHED_VERSION_KEY] = value(version.to_string());

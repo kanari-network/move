@@ -11,14 +11,14 @@ use crate::{
     ice,
     naming::ast::{
         BlockLabel, EnumDefinition, FunctionSignature, Neighbor, StructDefinition, SyntaxMethods,
-        Type, TypeName_, Type_, UseFuns, Var,
+        Type, Type_, TypeName_, UseFuns, Var,
     },
     parser::ast::{
-        BinOp, ConstantName, DatatypeName, Field, FunctionName, UnaryOp, VariantName,
-        ENTRY_MODIFIER, MACRO_MODIFIER, NATIVE_MODIFIER,
+        BinOp, ConstantName, DatatypeName, ENTRY_MODIFIER, Field, FunctionName, MACRO_MODIFIER,
+        NATIVE_MODIFIER, UnaryOp, VariantName,
     },
     shared::{
-        ast_debug::*, program_info::TypingProgramInfo, unique_map::UniqueMap, CompilationEnv, Name,
+        CompilationEnv, Name, ast_debug::*, program_info::TypingProgramInfo, unique_map::UniqueMap,
     },
 };
 use move_ir_types::location::*;

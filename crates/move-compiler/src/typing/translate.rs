@@ -3,17 +3,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    diag,
-    diagnostics::{codes::*, Diagnostic},
+    FullyCompiledProgram, diag,
+    diagnostics::{Diagnostic, codes::*},
     editions::{FeatureGate, Flavor},
     expansion::ast::{
-        AbilitySet, Attribute, AttributeValue_, Attribute_, DottedUsage, Fields, Friend,
+        AbilitySet, Attribute, Attribute_, AttributeValue_, DottedUsage, Fields, Friend,
         ModuleAccess_, ModuleIdent, ModuleIdent_, Mutability, Value_, Visibility,
     },
     ice,
     naming::ast::{
         self as N, BlockLabel, DatatypeTypeParameter, IndexSyntaxMethods, TParam, TParamID, Type,
-        TypeName_, Type_,
+        Type_, TypeName_,
     },
     parser::ast::{
         Ability_, BinOp, BinOp_, ConstantName, DatatypeName, Field, FunctionName, UnaryOp_,
@@ -30,12 +30,11 @@ use crate::{
     typing::{
         ast as T,
         core::{
-            self, public_testing_visibility, Context, PublicForTesting, ResolvedFunctionType, Subst,
+            self, Context, PublicForTesting, ResolvedFunctionType, Subst, public_testing_visibility,
         },
         dependency_ordering, expand, infinite_instantiations, macro_expand, recursive_datatypes,
         syntax_methods::validate_syntax_methods,
     },
-    FullyCompiledProgram,
 };
 use move_ir_types::location::*;
 use move_proc_macros::growing_stack;
@@ -2686,8 +2685,8 @@ fn check_mutation(context: &mut Context, loc: Loc, given_ref: Type, rvalue_ty: &
 //**************************************************************************************************
 
 fn resolve_field(context: &mut Context, loc: Loc, ty: Type, field: &Field) -> Type {
-    use TypeName_::*;
     use Type_::*;
+    use TypeName_::*;
     const UNINFERRED_MSG: &str =
         "Could not infer the type before field access. Try annotating here";
     let msg = || format!("Unbound field '{}'", field);
@@ -3495,8 +3494,8 @@ fn exp_to_borrow_(
     base_type: Type,
     warn_on_constant: bool,
 ) -> Box<T::Exp> {
-    use Type_::*;
     use T::UnannotatedExp_ as TE;
+    use Type_::*;
     if warn_on_constant {
         warn_on_constant_borrow(context, eb.exp.loc, &eb)
     };
@@ -3558,8 +3557,8 @@ fn method_call_resolve(
     method: Name,
     ty_args_opt: Option<Vec<Type>>,
 ) -> Option<(ModuleIdent, FunctionName, ResolvedFunctionType, T::Exp)> {
-    use TypeName_ as TN;
     use Type_ as Ty;
+    use TypeName_ as TN;
 
     let mut edotted = edotted;
 

@@ -6,15 +6,15 @@
 use crate::{
     diag,
     diagnostics::Diagnostic,
-    editions::{create_feature_error, Edition, FeatureGate},
+    editions::{Edition, FeatureGate, create_feature_error},
     expansion::{
         alias_map_builder::{AliasEntry, AliasMapBuilder, NameSpace},
         aliases::{AliasMap, AliasSet},
         ast::{self as E, Address, ModuleIdent, ModuleIdent_},
         legacy_aliases,
         translate::{
-            is_valid_datatype_or_constant_name, make_address, module_ident, top_level_address,
-            top_level_address_opt, value, DefnContext,
+            DefnContext, is_valid_datatype_or_constant_name, make_address, module_ident,
+            top_level_address, top_level_address_opt, value,
         },
     },
     ice, ice_assert,
@@ -25,7 +25,7 @@ use crate::{
     shared::*,
 };
 
-use move_ir_types::location::{sp, Loc, Spanned};
+use move_ir_types::location::{Loc, Spanned, sp};
 
 //**************************************************************************************************
 // Definitions
@@ -1175,7 +1175,7 @@ fn unexpected_address_module_error(loc: Loc, nloc: Loc, access: Access) -> Diagn
                     "ICE expected a module name and got one, but tried to report an error"
                 ),
                 (nloc, "Name location")
-            )
+            );
         }
     };
     let unexpected_msg = format!(

@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    diag,
-    diagnostics::{codes::WarningFilter, Diagnostic, WarningFilters},
+    FullyCompiledProgram, diag,
+    diagnostics::{Diagnostic, WarningFilters, codes::WarningFilter},
     editions::{self, Edition, FeatureGate, Flavor},
     expansion::{
         alias_map_builder::{
@@ -14,21 +14,20 @@ use crate::{
         ast::{self as E, Address, Fields, ModuleIdent, ModuleIdent_},
         byte_string, hex_string,
         path_expander::{
-            access_result, Access, LegacyPathExpander, ModuleAccessResult, Move2024PathExpander,
-            PathExpander,
+            Access, LegacyPathExpander, ModuleAccessResult, Move2024PathExpander, PathExpander,
+            access_result,
         },
         translate::known_attributes::{DiagnosticAttribute, KnownAttribute},
     },
     ice, ice_assert,
     parser::ast::{
-        self as P, Ability, BlockLabel, ConstantName, DatatypeName, Field, FieldBindings,
-        FunctionName, ModuleName, NameAccess, Var, VariantName, ENTRY_MODIFIER, MACRO_MODIFIER,
-        NATIVE_MODIFIER,
+        self as P, Ability, BlockLabel, ConstantName, DatatypeName, ENTRY_MODIFIER, Field,
+        FieldBindings, FunctionName, MACRO_MODIFIER, ModuleName, NATIVE_MODIFIER, NameAccess, Var,
+        VariantName,
     },
     shared::{known_attributes::AttributePosition, unique_map::UniqueMap, *},
-    FullyCompiledProgram,
 };
-use move_command_line_common::parser::{parse_u16, parse_u256, parse_u32};
+use move_command_line_common::parser::{parse_u16, parse_u32, parse_u256};
 use move_core_types::account_address::AccountAddress;
 use move_ir_types::location::*;
 use move_proc_macros::growing_stack;
@@ -3541,8 +3540,7 @@ fn valid_local_variable_name(s: Symbol) -> bool {
 }
 
 fn check_valid_function_parameter_name(context: &mut Context, is_macro: Option<Loc>, v: &Var) {
-    const SYNTAX_IDENTIFIER_NOTE: &str =
-        "'macro' parameters start with '$' to indicate that their arguments are not evaluated \
+    const SYNTAX_IDENTIFIER_NOTE: &str = "'macro' parameters start with '$' to indicate that their arguments are not evaluated \
         before the macro is expanded, meaning the entire expression is substituted. \
         This is different from regular function parameters that are evaluated before the \
         function is called.";

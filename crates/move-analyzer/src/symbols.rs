@@ -59,16 +59,16 @@ use crate::{
     diagnostics::{lsp_diagnostics, lsp_empty_diagnostics},
     utils::get_loc,
 };
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use codespan_reporting::files::SimpleFiles;
 use crossbeam::channel::Sender;
 use derivative::*;
 use im::ordmap::OrdMap;
 use lsp_server::{Request, RequestId};
 use lsp_types::{
-    request::GotoTypeDefinitionParams, Diagnostic, DocumentSymbol, DocumentSymbolParams,
-    GotoDefinitionParams, Hover, HoverContents, HoverParams, Location, MarkupContent, MarkupKind,
-    Position, Range, ReferenceParams, SymbolKind,
+    Diagnostic, DocumentSymbol, DocumentSymbolParams, GotoDefinitionParams, Hover, HoverContents,
+    HoverParams, Location, MarkupContent, MarkupKind, Position, Range, ReferenceParams, SymbolKind,
+    request::GotoTypeDefinitionParams,
 };
 
 use std::{
@@ -82,27 +82,27 @@ use std::{
 use tempfile::tempdir;
 use url::Url;
 use vfs::{
-    impls::{memory::MemoryFS, overlay::OverlayFS, physical::PhysicalFS},
     VfsPath,
+    impls::{memory::MemoryFS, overlay::OverlayFS, physical::PhysicalFS},
 };
 
 use move_command_line_common::files::FileHash;
 use move_compiler::{
-    command_line::compiler::{construct_pre_compiled_lib, FullyCompiledProgram},
+    PASS_CFGIR, PASS_PARSER, PASS_TYPING,
+    command_line::compiler::{FullyCompiledProgram, construct_pre_compiled_lib},
     editions::{Edition, FeatureGate, Flavor},
     expansion::ast::{
         self as E, AbilitySet, Fields, ModuleIdent, ModuleIdent_, Mutability, Value, Value_,
         Visibility,
     },
     linters::LintLevel,
-    naming::ast::{StructDefinition, StructFields, TParam, Type, TypeName_, Type_, UseFuns},
+    naming::ast::{StructDefinition, StructFields, TParam, Type, Type_, TypeName_, UseFuns},
     parser::ast::{self as P, DatatypeName},
-    shared::{unique_map::UniqueMap, Identifier, Name},
+    shared::{Identifier, Name, unique_map::UniqueMap},
     typing::ast::{
-        BuiltinFunction_, Exp, ExpListItem, Function, FunctionBody_, LValue, LValueList, LValue_,
+        BuiltinFunction_, Exp, ExpListItem, Function, FunctionBody_, LValue, LValue_, LValueList,
         ModuleCall, ModuleDefinition, SequenceItem, SequenceItem_, UnannotatedExp_,
     },
-    PASS_CFGIR, PASS_PARSER, PASS_TYPING,
 };
 use move_ir_types::location::*;
 use move_package::{
@@ -534,7 +534,7 @@ fn visibility_to_ide_string(visibility: &Visibility) -> String {
     visibility_str
 }
 
-fn type_args_to_ide_string(type_args: &Vec<Type>) -> String {
+fn type_args_to_ide_string(type_args: &[Type]) -> String {
     let mut type_args_str = "".to_string();
     if !type_args.is_empty() {
         type_args_str.push('<');
@@ -544,7 +544,7 @@ fn type_args_to_ide_string(type_args: &Vec<Type>) -> String {
     type_args_str
 }
 
-fn struct_type_args_to_ide_string(type_args: &Vec<(Type, bool)>) -> String {
+fn struct_type_args_to_ide_string(type_args: &[(Type, bool)]) -> String {
     let mut type_args_str = "".to_string();
     if !type_args.is_empty() {
         type_args_str.push('<');
@@ -1415,19 +1415,19 @@ fn mark_positional_struct(
         .source_definitions
         .iter()
         .find(|pkg_def| {
-            if let P::Definition::Module(mod_def) = &pkg_def.def {
-                if let Some(parsed_mod_ident_str) = parsing_mod_def_to_map_key(mod_def) {
-                    return mod_ident_str == &parsed_mod_ident_str;
-                }
+            if let P::Definition::Module(mod_def) = &pkg_def.def
+                && let Some(parsed_mod_ident_str) = parsing_mod_def_to_map_key(mod_def)
+            {
+                return mod_ident_str == &parsed_mod_ident_str;
             }
             false
         })
         .or_else(|| {
             parsed_program.lib_definitions.iter().find(|pkg_def| {
-                if let P::Definition::Module(mod_def) = &pkg_def.def {
-                    if let Some(parsed_mod_ident_str) = parsing_mod_def_to_map_key(mod_def) {
-                        return mod_ident_str == &parsed_mod_ident_str;
-                    }
+                if let P::Definition::Module(mod_def) = &pkg_def.def
+                    && let Some(parsed_mod_ident_str) = parsing_mod_def_to_map_key(mod_def)
+                {
+                    return mod_ident_str == &parsed_mod_ident_str;
                 }
                 false
             })
@@ -1484,7 +1484,9 @@ fn file_sources(
     overlay_fs: VfsPath,
 ) -> BTreeMap<FileHash, (FileName, String)> {
     resolved_graph
-        .package_table.values().flat_map(|rpkg| {
+        .package_table
+        .values()
+        .flat_map(|rpkg| {
             rpkg.get_sources(&resolved_graph.build_options)
                 .unwrap()
                 .iter()
@@ -1559,7 +1561,6 @@ pub fn empty_symbols() -> Symbols {
 }
 
 /// Main AST traversal functions
-
 /// Get symbols for outer definitions in the module (functions, structs, and consts)
 fn get_mod_outer_defs(
     loc: &Loc,
@@ -2485,8 +2486,8 @@ impl<'a> TypingSymbolicator<'a> {
                 // process RHS first to avoid accidentally binding its identifiers to LHS (which now
                 // will be put into the current scope only after RHS is processed)
                 self.exp_symbols(e, scope);
-                for opt_t in opt_types {
-                    if let Some(t) = opt_t { self.add_type_id_use_def(t) }
+                for t in opt_types.iter().flatten() {
+                    self.add_type_id_use_def(t)
                 }
                 self.lvalue_list_symbols(true, lvalues, scope);
             }
@@ -2627,8 +2628,8 @@ impl<'a> TypingSymbolicator<'a> {
             }
             E::Assign(lvalues, opt_types, e) => {
                 self.lvalue_list_symbols(false, lvalues, scope);
-                for opt_t in opt_types {
-                    if let Some(t) = opt_t { self.add_type_id_use_def(t) }
+                for t in opt_types.iter().flatten() {
+                    self.add_type_id_use_def(t)
                 }
                 self.exp_symbols(e, scope);
             }
@@ -2775,7 +2776,6 @@ impl<'a> TypingSymbolicator<'a> {
     }
 
     /// Helper functions
-
     /// Add type parameter to a scope holding type params
     fn add_type_param(&mut self, tp: &TParam, tp_scope: &mut BTreeMap<Symbol, DefLoc>) {
         match get_start_loc(
@@ -3597,13 +3597,13 @@ pub fn on_use_request(
     let mut result = None;
 
     let mut use_def_found = false;
-    if let Some(mod_symbols) = symbols.file_use_defs.get(use_fpath) {
-        if let Some(uses) = mod_symbols.get(use_line) {
-            for u in uses {
-                if use_col >= u.col_start && use_col <= u.col_end {
-                    result = use_def_action(&u);
-                    use_def_found = true;
-                }
+    if let Some(mod_symbols) = symbols.file_use_defs.get(use_fpath)
+        && let Some(uses) = mod_symbols.get(use_line)
+    {
+        for u in uses {
+            if use_col >= u.col_start && use_col <= u.col_end {
+                result = use_def_action(&u);
+                use_def_found = true;
             }
         }
     }
@@ -4052,7 +4052,9 @@ fn docstring_test() {
         "M6.move",
         "fun Symbols::M6::other_doc_struct(): Symbols::M7::OtherDocStruct",
         Some((3, 11, "M7.move")),
-        Some("\nThis is a multiline docstring\n\nThis docstring has empty lines.\n\nIt uses the ** format instead of ///\n\n"),
+        Some(
+            "\nThis is a multiline docstring\n\nThis docstring has empty lines.\n\nIt uses the ** format instead of ///\n\n",
+        ),
     );
 
     // docstring construction for single-line /** .. */ based strings

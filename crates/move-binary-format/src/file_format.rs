@@ -28,10 +28,10 @@
 //! those structs translate to tables and table specifications.
 
 use crate::{
+    IndexKind, SignatureTokenKind,
     errors::{PartialVMError, PartialVMResult},
     file_format_common,
     internals::ModuleIndex,
-    IndexKind, SignatureTokenKind,
 };
 use move_core_types::{
     account_address::AccountAddress,
@@ -1112,11 +1112,10 @@ impl SignatureToken {
     pub fn debug_set_sh_idx(&mut self, sh_idx: StructHandleIndex) {
         match self {
             SignatureToken::Struct(wrapped) => *wrapped = sh_idx,
-            SignatureToken::StructInstantiation(struct_inst) => {
-                Box::as_mut(struct_inst).0 = sh_idx
+            SignatureToken::StructInstantiation(struct_inst) => Box::as_mut(struct_inst).0 = sh_idx,
+            SignatureToken::Reference(token) | SignatureToken::MutableReference(token) => {
+                token.debug_set_sh_idx(sh_idx)
             }
-            SignatureToken::Reference(token)
-            | SignatureToken::MutableReference(token) => token.debug_set_sh_idx(sh_idx),
             other => panic!(
                 "debug_set_sh_idx (to {}) called for non-struct token {:?}",
                 sh_idx, other

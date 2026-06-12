@@ -7,14 +7,14 @@ use std::collections::BTreeMap;
 use itertools::Itertools;
 
 use move_binary_format::{
-    file_format::{Constant, FunctionDefinitionIndex, StructDefinitionIndex},
     CompiledModule,
+    file_format::{Constant, FunctionDefinitionIndex, StructDefinitionIndex},
 };
 use move_bytecode_source_map::source_map::SourceMap;
 use move_compiler::{
     expansion::ast as EA,
     parser::ast as PA,
-    shared::{unique_map::UniqueMap, Name, TName},
+    shared::{Name, TName, unique_map::UniqueMap},
 };
 use move_ir_types::ast::ConstantName;
 
@@ -25,8 +25,8 @@ use crate::{
         model_builder::{ConstEntry, ModelBuilder},
     },
     model::{
-        FunId, FunctionData, Loc, ModuleId, NamedConstantData, NamedConstantId, StructData,
-        StructId, SCRIPT_BYTECODE_FUN_NAME,
+        FunId, FunctionData, Loc, ModuleId, NamedConstantData, NamedConstantId,
+        SCRIPT_BYTECODE_FUN_NAME, StructData, StructId,
     },
     project_1st,
     symbol::{Symbol, SymbolPool},

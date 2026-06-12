@@ -16,7 +16,7 @@ use move_core_types::{
     gas_algebra::AbstractMemorySize,
     runtime_value::{MoveStructLayout, MoveTypeLayout},
     u256,
-    vm_status::{sub_status::NFE_VECTOR_ERROR_BASE, StatusCode},
+    vm_status::{StatusCode, sub_status::NFE_VECTOR_ERROR_BASE},
 };
 use std::{
     cell::RefCell,
@@ -390,7 +390,7 @@ impl Container {
                 return Err(
                     PartialVMError::new(StatusCode::UNKNOWN_INVARIANT_VIOLATION_ERROR)
                         .with_message("cannot copy a Locals container".to_string()),
-                )
+                );
             }
         })
     }
@@ -487,7 +487,7 @@ impl ValueImpl {
             | (ContainerRef(_), _)
             | (IndexedRef(_), _) => {
                 return Err(PartialVMError::new(StatusCode::INTERNAL_TYPE_ERROR)
-                    .with_message(format!("cannot compare values: {:?}, {:?}", self, other)))
+                    .with_message(format!("cannot compare values: {:?}, {:?}", self, other)));
             }
         };
 
@@ -539,7 +539,7 @@ impl Container {
                         "cannot compare container values: {:?}, {:?}",
                         self, other
                     )),
-                )
+                );
             }
         };
 
@@ -649,7 +649,7 @@ impl IndexedRef {
             | (VecBool(_), _)
             | (VecAddress(_), _) => {
                 return Err(PartialVMError::new(StatusCode::INTERNAL_TYPE_ERROR)
-                    .with_message(format!("cannot compare references {:?}, {:?}", self, other)))
+                    .with_message(format!("cannot compare references {:?}, {:?}", self, other)));
             }
         };
         Ok(res)
@@ -739,7 +739,7 @@ impl ContainerRef {
                                 )
                                 .with_message(
                                     "failed to write_ref: container type mismatch".to_string(),
-                                ))
+                                ));
                             }
                         };
                         *$r1.borrow_mut() = take_unique_ownership(r)?;
@@ -761,7 +761,7 @@ impl ContainerRef {
                         return Err(PartialVMError::new(
                             StatusCode::UNKNOWN_INVARIANT_VIOLATION_ERROR,
                         )
-                        .with_message("cannot overwrite Container::Locals".to_string()))
+                        .with_message("cannot overwrite Container::Locals".to_string()));
                     }
                 }
                 self.mark_dirty();
@@ -773,7 +773,7 @@ impl ContainerRef {
                             "cannot write value {:?} to container ref {:?}",
                             v, self
                         )),
-                )
+                );
             }
         }
         Ok(())
@@ -793,7 +793,7 @@ impl IndexedRef {
                             "cannot write value {:?} to indexed ref {:?}",
                             x, self
                         )),
-                )
+                );
             }
             _ => (),
         }
@@ -825,7 +825,7 @@ impl IndexedRef {
                         "cannot write value {:?} to indexed ref {:?}",
                         x, self
                     )),
-                )
+                );
             }
         }
         self.container_ref.mark_dirty();
@@ -999,17 +999,14 @@ impl Locals {
         let mut v = self.0.borrow_mut();
         match v.get_mut(idx) {
             Some(v) => {
-                if violation_check {
-                    if let ValueImpl::Container(c) = v {
-                        if c.rc_count() > 1 {
-                            return Err(PartialVMError::new(
-                                StatusCode::UNKNOWN_INVARIANT_VIOLATION_ERROR,
-                            )
-                            .with_message(
-                                "moving container with dangling references".to_string(),
-                            ));
-                        }
-                    }
+                if violation_check
+                    && let ValueImpl::Container(c) = v
+                    && c.rc_count() > 1
+                {
+                    return Err(
+                        PartialVMError::new(StatusCode::UNKNOWN_INVARIANT_VIOLATION_ERROR)
+                            .with_message("moving container with dangling references".to_string()),
+                    );
                 }
                 Ok(Value(std::mem::replace(v, x.0)))
             }
@@ -2266,7 +2263,7 @@ impl Vector {
                 return Err(
                     PartialVMError::new(StatusCode::UNKNOWN_INVARIANT_VIOLATION_ERROR)
                         .with_message(format!("invalid type param for vector: {:?}", type_param)),
-                )
+                );
             }
         };
 
@@ -2522,7 +2519,7 @@ impl GlobalValueImpl {
     fn move_from(&mut self) -> PartialVMResult<ValueImpl> {
         let fields = match self {
             Self::None | Self::Deleted => {
-                return Err(PartialVMError::new(StatusCode::MISSING_DATA))
+                return Err(PartialVMError::new(StatusCode::MISSING_DATA));
             }
             Self::Fresh { .. } => match std::mem::replace(self, Self::None) {
                 Self::Fresh { fields } => fields,
@@ -2548,7 +2545,7 @@ impl GlobalValueImpl {
                 return Err((
                     PartialVMError::new(StatusCode::RESOURCE_ALREADY_EXISTS),
                     val,
-                ))
+                ));
             }
             Self::None => *self = Self::fresh(val)?,
             Self::Deleted => *self = Self::cached(val, GlobalDataStatus::Dirty)?,
@@ -2971,9 +2968,9 @@ pub mod debug {
  *
  **************************************************************************************/
 use serde::{
+    Deserialize,
     de::Error as DeError,
     ser::{Error as SerError, SerializeSeq, SerializeTuple},
-    Deserialize,
 };
 
 impl Value {
