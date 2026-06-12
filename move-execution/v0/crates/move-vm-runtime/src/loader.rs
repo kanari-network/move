@@ -1574,8 +1574,8 @@ impl LoadedModule {
                         | Bytecode::VecPushBack(si)
                         | Bytecode::VecPopBack(si)
                         | Bytecode::VecUnpack(si, _)
-                        | Bytecode::VecSwap(si) => {
-                            if !single_signature_token_map.contains_key(si) {
+                        | Bytecode::VecSwap(si)
+                            if !single_signature_token_map.contains_key(si) => {
                                 let ty = match module.signature_at(*si).0.first() {
                                     None => {
                                         return Err(PartialVMError::new(
@@ -1592,7 +1592,6 @@ impl LoadedModule {
                                 single_signature_token_map
                                     .insert(*si, cache.make_type(module, ty)?);
                             }
-                        }
                         _ => {}
                     }
                 }

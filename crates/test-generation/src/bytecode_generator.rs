@@ -319,11 +319,9 @@ impl<'a> BytecodeGenerator<'a> {
         if let Some(call_size) = state
             .call_graph
             .call_depth(fn_context.function_handle_index, call)
-        {
-            if call_size + fn_context.starting_call_height <= CALL_STACK_LIMIT {
+            && call_size + fn_context.starting_call_height <= CALL_STACK_LIMIT {
                 return Some(call);
             }
-        }
         None
     }
 

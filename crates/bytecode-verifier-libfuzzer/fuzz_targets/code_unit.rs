@@ -18,7 +18,7 @@ use libfuzzer_sys::fuzz_target;
 #[no_mangle]
 pub extern "C" fn main() -> i32 {
     libfuzzer_sys::initialize(std::ptr::null(), std::ptr::null());
-    return 0;
+    0
 }
 
 fuzz_target!(|code_unit: CodeUnit| {

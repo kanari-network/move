@@ -131,9 +131,9 @@ pub fn interpret_with_options(
     // collect settings
     let settings = InterpreterSettings {
         no_expr_check: options.no_expr_check,
-        verbose_stepwise: options.verbose.map_or(false, |level| level > 0),
-        verbose_bytecode: options.verbose.map_or(false, |level| level > 1),
-        verbose_expression: options.verbose.map_or(false, |level| level > 2),
+        verbose_stepwise: options.verbose.is_some_and(|level| level > 0),
+        verbose_bytecode: options.verbose.is_some_and(|level| level > 1),
+        verbose_expression: options.verbose.is_some_and(|level| level > 2),
     };
 
     // run the actual interpreter

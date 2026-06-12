@@ -486,8 +486,7 @@ impl CompiledPackage {
         let lint_level = resolution_graph.build_options.lint_flag.get();
         let sui_mode = resolution_graph
             .build_options
-            .default_flavor
-            .map_or(false, |f| f == Flavor::Sui);
+            .default_flavor == Some(Flavor::Sui);
 
         let mut compiler = Compiler::from_package_paths(vfs_root, paths, bytecode_deps)
             .unwrap()

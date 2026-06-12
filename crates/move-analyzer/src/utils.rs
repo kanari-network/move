@@ -16,10 +16,7 @@ pub fn get_loc(
     files: &SimpleFiles<Symbol, String>,
     file_id_mapping: &HashMap<FileHash, usize>,
 ) -> Option<Position> {
-    let id = match file_id_mapping.get(fhash) {
-        Some(v) => v,
-        None => return None,
-    };
+    let id = file_id_mapping.get(fhash)?;
     match files.location(*id, pos as usize) {
         Ok(v) => Some(Position {
             // we need 0-based column location

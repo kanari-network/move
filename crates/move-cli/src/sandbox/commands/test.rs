@@ -101,7 +101,7 @@ fn determine_package_nest_depth(
     pkg_dir: &Path,
 ) -> anyhow::Result<usize> {
     let mut depth = 0;
-    for (_, dep) in resolution_graph.package_table.iter() {
+    for dep in resolution_graph.package_table.values() {
         depth = std::cmp::max(
             depth,
             dep.package_path.strip_prefix(pkg_dir)?.components().count() + 1,
@@ -139,7 +139,7 @@ fn copy_deps(tmp_dir: &Path, pkg_dir: &Path) -> anyhow::Result<PathBuf> {
     };
     let package_nest_depth = determine_package_nest_depth(&package_resolution, pkg_dir)?;
     let tmp_dir = pad_tmp_path(tmp_dir, package_nest_depth)?;
-    for (_, dep) in package_resolution.package_table.iter() {
+    for dep in package_resolution.package_table.values() {
         let source_dep_path = &dep.package_path;
         let dest_dep_path = tmp_dir.join(dep.package_path.strip_prefix(pkg_dir).unwrap());
         if !dest_dep_path.exists() {

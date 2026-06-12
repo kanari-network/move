@@ -67,7 +67,7 @@ impl Subst {
                     return false;
                 }
                 assert!(params1.len() == params2.len());
-                for (s1, s2) in params1.into_iter().zip(params2.into_iter()) {
+                for (s1, s2) in params1.into_iter().zip(params2) {
                     if !self.check_and_add(s1, s2) {
                         return false;
                     }
@@ -81,7 +81,7 @@ impl Subst {
     /// Return the instantiation from the substitution that has been built.
     pub fn instantiation(self) -> Vec<SignatureToken> {
         let mut vec = self.subst.into_iter().collect::<Vec<_>>();
-        vec.sort_by(|a, b| a.0.cmp(&b.0));
+        vec.sort_by_key(|a| a.0);
         vec.into_iter().map(|x| x.1).collect()
     }
 }
@@ -298,11 +298,10 @@ pub fn stack_has_polymorphic_eq(state: &AbstractState, index1: usize, index2: us
 /// Determine whether an abstract value on the stack and a abstract value in the locals have the
 /// same type
 pub fn stack_local_polymorphic_eq(state: &AbstractState, index1: usize, index2: usize) -> bool {
-    if stack_has(state, index1, None) {
-        if let Some((abstract_value, _)) = state.local_get(index2) {
+    if stack_has(state, index1, None)
+        && let Some((abstract_value, _)) = state.local_get(index2) {
             return state.stack_peek(index1) == Some(abstract_value.clone());
         }
-    }
     false
 }
 
@@ -321,8 +320,8 @@ pub fn local_availability_is(state: &AbstractState, index: u8, availability: Bor
 /// Determine whether an abstract value on the stack that is a reference points to something of the
 /// same type as another abstract value on the stack
 pub fn stack_ref_polymorphic_eq(state: &AbstractState, index1: usize, index2: usize) -> bool {
-    if stack_has(state, index2, None) {
-        if let Some(abstract_value) = state.stack_peek(index1) {
+    if stack_has(state, index2, None)
+        && let Some(abstract_value) = state.stack_peek(index1) {
             match abstract_value.token {
                 SignatureToken::MutableReference(token) | SignatureToken::Reference(token) => {
                     let abstract_value_inner = AbstractValue {
@@ -346,7 +345,6 @@ pub fn stack_ref_polymorphic_eq(state: &AbstractState, index1: usize, index2: us
                 | SignatureToken::U256 => return false,
             }
         }
-    }
     false
 }
 
@@ -557,8 +555,8 @@ pub fn get_struct_instantiation_for_state(
 /// The `struct_index` can be `Some(index)` to check for a particular struct,
 /// or `None` to just check that there is a a struct.
 pub fn stack_has_struct(state: &AbstractState, struct_index: StructDefinitionIndex) -> bool {
-    if state.stack_len() > 0 {
-        if let Some(struct_value) = state.stack_peek(0) {
+    if state.stack_len() > 0
+        && let Some(struct_value) = state.stack_peek(0) {
             match struct_value.token {
                 SignatureToken::Struct(struct_handle) => {
                     let struct_def = state.module.module.struct_def_at(struct_index);
@@ -584,7 +582,6 @@ pub fn stack_has_struct(state: &AbstractState, struct_index: StructDefinitionInd
                 | SignatureToken::U256 => return false,
             }
         }
-    }
     false
 }
 
@@ -655,8 +652,8 @@ pub fn stack_struct_has_field(state: &AbstractState, field_index: FieldHandleInd
 /// Determine whether the stack has a reference at `index` with the given mutability.
 /// If `mutable` is `Either` then the reference can be either mutable or immutable
 pub fn stack_has_reference(state: &AbstractState, index: usize, mutability: Mutability) -> bool {
-    if state.stack_len() > index {
-        if let Some(abstract_value) = state.stack_peek(index) {
+    if state.stack_len() > index
+        && let Some(abstract_value) = state.stack_peek(index) {
             match abstract_value.token {
                 SignatureToken::MutableReference(_) => {
                     if mutability == Mutability::Mutable || mutability == Mutability::Either {
@@ -683,7 +680,6 @@ pub fn stack_has_reference(state: &AbstractState, index: usize, mutability: Muta
                 | SignatureToken::U256 => return false,
             }
         }
-    }
     false
 }
 

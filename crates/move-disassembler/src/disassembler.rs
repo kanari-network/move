@@ -517,7 +517,7 @@ impl<'a> Disassembler<'a> {
                 Ok(format!(
                     "LdConst[{}]({:?}: {})",
                     idx,
-                    &constant.type_,
+                    constant.type_,
                     Self::preview_const(&constant.data),
                 ))
             }
@@ -1126,7 +1126,7 @@ impl<'a> Disassembler<'a> {
             name,
             format!(
                 "{entry_modifier}{native_modifier}{visibility_modifier}{name}{ty_params}({params}){ret_type}{body}",
-                params = &params.join(", "),
+                params = params.join(", "),
                 ret_type = Self::format_ret_type(&ret_type),
             ),
         ))
@@ -1212,7 +1212,7 @@ impl<'a> Disassembler<'a> {
             name = name,
             ty_params = ty_params,
             abilities = abilities,
-            fields = &fields.join(",\n\t"),
+            fields = fields.join(",\n\t"),
         ))
     }
 
@@ -1302,9 +1302,9 @@ impl<'a> Disassembler<'a> {
             "// Move bytecode v{version}\n{header} {{{imports}\n{struct_defs}\n\n{function_defs}\n{constant_pool_string}}}",
             version = version,
             header = header,
-            imports = &imports_str,
-            struct_defs = &struct_defs.join("\n"),
-            function_defs = &function_defs.join("\n"),
+            imports = imports_str,
+            struct_defs = struct_defs.join("\n"),
+            function_defs = function_defs.join("\n"),
         ))
     }
 }

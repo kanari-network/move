@@ -1199,13 +1199,10 @@ impl<'env> FunctionContext<'env> {
                             follow_pointer_edge(trace.first().unwrap(), edge)
                         } else {
                             match edge {
-                                BorrowEdge::Hyper(hyper) => {
-                                    if hyper.len() == trace.len() {
+                                BorrowEdge::Hyper(hyper)
+                                    if hyper.len() == trace.len() => {
                                         follow_pointer_trace(&trace, hyper)
-                                    } else {
-                                        false
                                     }
-                                }
                                 _ => false,
                             }
                         }
@@ -2239,7 +2236,7 @@ impl<'env> FunctionContext<'env> {
     //
 
     fn code_offset_by_label(&self, label: Label) -> CodeOffset {
-        return *self.label_offsets.get(&label).unwrap();
+        *self.label_offsets.get(&label).unwrap()
     }
 
     fn module_location(&self) -> Location {

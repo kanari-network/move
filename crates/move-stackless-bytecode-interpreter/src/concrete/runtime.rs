@@ -128,7 +128,7 @@ fn check_and_convert_type_args_and_args(
         ));
     }
     let mut converted_args = vec![];
-    for (i, (arg, param)) in args.iter().zip(params.into_iter()).enumerate() {
+    for (i, (arg, param)) in args.iter().zip(params).enumerate() {
         let local_ty = fun_env.get_local_type(i);
         debug_assert_eq!(local_ty, param.1);
 

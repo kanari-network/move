@@ -1484,9 +1484,7 @@ fn file_sources(
     overlay_fs: VfsPath,
 ) -> BTreeMap<FileHash, (FileName, String)> {
     resolved_graph
-        .package_table
-        .iter()
-        .flat_map(|(_, rpkg)| {
+        .package_table.values().flat_map(|rpkg| {
             rpkg.get_sources(&resolved_graph.build_options)
                 .unwrap()
                 .iter()
@@ -2488,10 +2486,7 @@ impl<'a> TypingSymbolicator<'a> {
                 // will be put into the current scope only after RHS is processed)
                 self.exp_symbols(e, scope);
                 for opt_t in opt_types {
-                    match opt_t {
-                        Some(t) => self.add_type_id_use_def(t),
-                        None => (),
-                    }
+                    if let Some(t) = opt_t { self.add_type_id_use_def(t) }
                 }
                 self.lvalue_list_symbols(true, lvalues, scope);
             }
@@ -2633,10 +2628,7 @@ impl<'a> TypingSymbolicator<'a> {
             E::Assign(lvalues, opt_types, e) => {
                 self.lvalue_list_symbols(false, lvalues, scope);
                 for opt_t in opt_types {
-                    match opt_t {
-                        Some(t) => self.add_type_id_use_def(t),
-                        None => (),
-                    }
+                    if let Some(t) = opt_t { self.add_type_id_use_def(t) }
                 }
                 self.exp_symbols(e, scope);
             }
@@ -3331,10 +3323,7 @@ fn find_struct(
     mod_ident: &ModuleIdent_,
     struct_name: &Symbol,
 ) -> Option<DefLoc> {
-    let mod_defs = match mod_outer_defs.get(&format!("{}", mod_ident)) {
-        Some(v) => v,
-        None => return None,
-    };
+    let mod_defs = mod_outer_defs.get(&format!("{}", mod_ident))?;
     mod_defs.structs.get(struct_name).map(|struct_def| {
         let fhash = mod_defs.fhash;
         let start = struct_def.name_start;

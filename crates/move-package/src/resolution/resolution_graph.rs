@@ -310,9 +310,7 @@ impl ResolvedGraph {
     }
 
     pub fn file_sources(&self) -> BTreeMap<FileHash, (FileName, String)> {
-        self.package_table
-            .iter()
-            .flat_map(|(_, rpkg)| {
+        self.package_table.values().flat_map(|rpkg| {
                 rpkg.get_sources(&self.build_options)
                     .unwrap()
                     .iter()
@@ -349,7 +347,7 @@ impl Package {
         let pkg_id = custom_resolve_pkg_id(&self.source_package).with_context(|| {
             format!(
                 "Resolving package name for '{}'",
-                &self.source_package.package.name
+                self.source_package.package.name
             )
         })?;
         for (name, addr) in self.source_package.addresses.iter().flatten() {
@@ -369,7 +367,7 @@ impl Package {
         let pkg_id = custom_resolve_pkg_id(&self.source_package).with_context(|| {
             format!(
                 "Resolving package name for '{}'",
-                &self.source_package.package.name
+                self.source_package.package.name
             )
         })?;
         let dep_name = dep.dep_name;
@@ -441,7 +439,7 @@ impl Package {
         let pkg_id = custom_resolve_pkg_id(&self.source_package).with_context(|| {
             format!(
                 "Resolving package name for '{}'",
-                &self.source_package.package.name
+                self.source_package.package.name
             )
         })?;
         let mut unresolved_addresses = Vec::new();
@@ -473,7 +471,7 @@ impl Package {
             .with_context(|| {
                 format!(
                     "Resolving package name for '{}'",
-                    &self.source_package.package.name
+                    self.source_package.package.name
                 )
             })
             .unwrap();

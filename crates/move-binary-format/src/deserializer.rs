@@ -345,7 +345,7 @@ fn read_table(cursor: &mut VersionedCursor) -> BinaryLoaderResult<Table> {
 /// Tables cannot have duplicates, must cover the entire blob and must be disjoint.
 fn check_tables(tables: &mut Vec<Table>, binary_len: usize) -> BinaryLoaderResult<u32> {
     // there is no real reason to pass a mutable reference but we are sorting next line
-    tables.sort_by(|t1, t2| t1.offset.cmp(&t2.offset));
+    tables.sort_by_key(|t1| t1.offset);
 
     let mut current_offset: u32 = 0;
     let mut table_types = HashSet::new();
@@ -774,7 +774,7 @@ fn load_address_identifiers(
     addresses: &mut AddressIdentifierPool,
 ) -> BinaryLoaderResult<()> {
     let mut start = table.offset as usize;
-    if table.count as usize % AccountAddress::LENGTH != 0 {
+    if !(table.count as usize).is_multiple_of(AccountAddress::LENGTH) {
         return Err(PartialVMError::new(StatusCode::MALFORMED)
             .with_message("Bad Address Identifier pool size".to_string()));
     }
@@ -1384,8 +1384,8 @@ fn load_code(cursor: &mut VersionedCursor, code: &mut Vec<Bytecode>) -> BinaryLo
             | Opcodes::VEC_PUSH_BACK
             | Opcodes::VEC_POP_BACK
             | Opcodes::VEC_UNPACK
-            | Opcodes::VEC_SWAP => {
-                if cursor.version() < VERSION_4 {
+            | Opcodes::VEC_SWAP
+                if cursor.version() < VERSION_4 => {
                     return Err(
                         PartialVMError::new(StatusCode::MALFORMED).with_message(format!(
                             "Vector operations not available before bytecode version {}",
@@ -1393,7 +1393,6 @@ fn load_code(cursor: &mut VersionedCursor, code: &mut Vec<Bytecode>) -> BinaryLo
                         )),
                     );
                 }
-            }
             _ => {}
         };
 

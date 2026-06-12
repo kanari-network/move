@@ -141,10 +141,7 @@ fn get_cursor_token(buffer: &str, position: &Position) -> Option<Tok> {
         return None;
     }
 
-    let line = match buffer.lines().nth(position.line as usize) {
-        Some(line) => line,
-        None => return None, // Our buffer does not contain the line, and so must be out of date.
-    };
+    let line = buffer.lines().nth(position.line as usize)?;
     match line.chars().nth(position.character as usize - 1) {
         Some('.') => Some(Tok::Period),
         Some(':') => {

@@ -147,7 +147,7 @@ pub fn parse_package_info(tval: TV) -> Result<PM::PackageInfo> {
                                 .ok_or_else(|| {
                                     format_err!(
                                         "Invalid author '{}' of type {} found. Expected a string.",
-                                        tval.to_string(),
+                                        tval,
                                         tval.type_str()
                                     )
                                 })
@@ -360,7 +360,7 @@ pub fn parse_dependency(dep_name: &str, mut tval: TV) -> Result<PM::Dependency> 
         .remove("override")
         .map(parse_dep_override)
         .transpose()?
-        .map_or(false, |o| o);
+        .unwrap_or(false);
 
     let kind = match (
         table.remove("local"),

@@ -469,7 +469,7 @@ impl<Progress: Write> DependencyGraphBuilder<Progress> {
                     self.get_graph(&d.kind, pkg_path, manifest_string, lock_string)?;
                 self.visited_dependencies.pop_front();
                 // reroot all packages to normalize local paths across all graphs
-                for (_, p) in pkg_graph.package_table.iter_mut() {
+                for p in pkg_graph.package_table.values_mut() {
                     if modified {
                         // new sub-graph has been constructed whose paths are already re-rooted with
                         // respect to its immediate parent

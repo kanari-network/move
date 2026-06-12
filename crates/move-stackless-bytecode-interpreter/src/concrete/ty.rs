@@ -623,7 +623,7 @@ impl Type {
         matches!(
             self,
             Type::Reference(self_is_mut, _)
-            if is_mut_opt.map_or(true, |is_mut| *self_is_mut == is_mut)
+            if is_mut_opt.is_none_or(|is_mut| *self_is_mut == is_mut)
         )
     }
 
