@@ -9,9 +9,42 @@ use move_core_types::{
     identifier::Identifier,
     language_storage::{StructTag, TypeTag},
 };
+use serde::ser::{Serialize, SerializeMap, SerializeSeq, Serializer};
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
-use serde_yaml::{Mapping, Value};
 use std::path::Path;
+
+enum YamlValue {
+    String(String),
+    Number(u64),
+    Sequence(Vec<YamlValue>),
+    Mapping(Vec<(YamlValue, YamlValue)>),
+}
+
+impl Serialize for YamlValue {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::String(value) => serializer.serialize_str(value),
+            Self::Number(value) => serializer.serialize_u64(*value),
+            Self::Sequence(values) => {
+                let mut sequence = serializer.serialize_seq(Some(values.len()))?;
+                for value in values {
+                    sequence.serialize_element(value)?;
+                }
+                sequence.end()
+            }
+            Self::Mapping(entries) => {
+                let mut mapping = serializer.serialize_map(Some(entries.len()))?;
+                for (key, value) in entries {
+                    mapping.serialize_entry(key, value)?;
+                }
+                mapping.end()
+            }
+        }
+    }
+}
 
 pub fn generate_struct_layouts(
     path: &Path,
@@ -58,23 +91,25 @@ pub fn generate_struct_layouts(
     }
 }
 
-fn tagged_value(tag: &str, value: Value) -> Value {
-    let mut mapping = Mapping::new();
-    mapping.insert(Value::String(tag.to_owned()), value);
-    Value::Mapping(mapping)
+fn tagged_value(tag: &str, value: YamlValue) -> YamlValue {
+    YamlValue::Mapping(vec![(YamlValue::String(tag.to_owned()), value)])
 }
 
-fn named_value<T>(named: &Named<T>, convert: impl FnOnce(&T) -> Result<Value>) -> Result<Value> {
-    let mut mapping = Mapping::new();
-    mapping.insert(Value::String(named.name.clone()), convert(&named.value)?);
-    Ok(Value::Mapping(mapping))
+fn named_value<T>(
+    named: &Named<T>,
+    convert: impl FnOnce(&T) -> Result<YamlValue>,
+) -> Result<YamlValue> {
+    Ok(YamlValue::Mapping(vec![(
+        YamlValue::String(named.name.clone()),
+        convert(&named.value)?,
+    )]))
 }
 
-fn format_to_yaml(format: &Format) -> Result<Value> {
-    let scalar = |name: &str| Ok(Value::String(name.to_owned()));
+fn format_to_yaml(format: &Format) -> Result<YamlValue> {
+    let scalar = |name: &str| Ok(YamlValue::String(name.to_owned()));
     match format {
         Format::Variable(_) => bail!("Cannot serialize unresolved format variables"),
-        Format::TypeName(name) => Ok(tagged_value("TYPENAME", Value::String(name.clone()))),
+        Format::TypeName(name) => Ok(tagged_value("TYPENAME", YamlValue::String(name.clone()))),
         Format::Unit => scalar("UNIT"),
         Format::Bool => scalar("BOOL"),
         Format::I8 => scalar("I8"),
@@ -94,44 +129,49 @@ fn format_to_yaml(format: &Format) -> Result<Value> {
         Format::Bytes => scalar("BYTES"),
         Format::Option(value) => Ok(tagged_value("OPTION", format_to_yaml(value)?)),
         Format::Seq(value) => Ok(tagged_value("SEQ", format_to_yaml(value)?)),
-        Format::Map { key, value } => {
-            let mut mapping = Mapping::new();
-            mapping.insert(Value::String("KEY".to_owned()), format_to_yaml(key)?);
-            mapping.insert(Value::String("VALUE".to_owned()), format_to_yaml(value)?);
-            Ok(tagged_value("MAP", Value::Mapping(mapping)))
-        }
+        Format::Map { key, value } => Ok(tagged_value(
+            "MAP",
+            YamlValue::Mapping(vec![
+                (YamlValue::String("KEY".to_owned()), format_to_yaml(key)?),
+                (
+                    YamlValue::String("VALUE".to_owned()),
+                    format_to_yaml(value)?,
+                ),
+            ]),
+        )),
         Format::Tuple(values) => Ok(tagged_value(
             "TUPLE",
-            Value::Sequence(
+            YamlValue::Sequence(
                 values
                     .iter()
                     .map(format_to_yaml)
                     .collect::<Result<Vec<_>>>()?,
             ),
         )),
-        Format::TupleArray { content, size } => {
-            let mut mapping = Mapping::new();
-            mapping.insert(
-                Value::String("CONTENT".to_owned()),
-                format_to_yaml(content)?,
-            );
-            mapping.insert(
-                Value::String("SIZE".to_owned()),
-                serde_yaml::to_value(size)?,
-            );
-            Ok(tagged_value("TUPLEARRAY", Value::Mapping(mapping)))
-        }
+        Format::TupleArray { content, size } => Ok(tagged_value(
+            "TUPLEARRAY",
+            YamlValue::Mapping(vec![
+                (
+                    YamlValue::String("CONTENT".to_owned()),
+                    format_to_yaml(content)?,
+                ),
+                (
+                    YamlValue::String("SIZE".to_owned()),
+                    YamlValue::Number(*size as u64),
+                ),
+            ]),
+        )),
     }
 }
 
-fn variant_to_yaml(variant: &VariantFormat) -> Result<Value> {
+fn variant_to_yaml(variant: &VariantFormat) -> Result<YamlValue> {
     match variant {
         VariantFormat::Variable(_) => bail!("Cannot serialize unresolved variant variables"),
-        VariantFormat::Unit => Ok(Value::String("UNIT".to_owned())),
+        VariantFormat::Unit => Ok(YamlValue::String("UNIT".to_owned())),
         VariantFormat::NewType(value) => Ok(tagged_value("NEWTYPE", format_to_yaml(value)?)),
         VariantFormat::Tuple(values) => Ok(tagged_value(
             "TUPLE",
-            Value::Sequence(
+            YamlValue::Sequence(
                 values
                     .iter()
                     .map(format_to_yaml)
@@ -140,7 +180,7 @@ fn variant_to_yaml(variant: &VariantFormat) -> Result<Value> {
         )),
         VariantFormat::Struct(fields) => Ok(tagged_value(
             "STRUCT",
-            Value::Sequence(
+            YamlValue::Sequence(
                 fields
                     .iter()
                     .map(|field| named_value(field, format_to_yaml))
@@ -150,15 +190,15 @@ fn variant_to_yaml(variant: &VariantFormat) -> Result<Value> {
     }
 }
 
-fn container_to_yaml(container: &ContainerFormat) -> Result<Value> {
+fn container_to_yaml(container: &ContainerFormat) -> Result<YamlValue> {
     match container {
-        ContainerFormat::UnitStruct => Ok(Value::String("UNITSTRUCT".to_owned())),
+        ContainerFormat::UnitStruct => Ok(YamlValue::String("UNITSTRUCT".to_owned())),
         ContainerFormat::NewTypeStruct(value) => {
             Ok(tagged_value("NEWTYPESTRUCT", format_to_yaml(value)?))
         }
         ContainerFormat::TupleStruct(values) => Ok(tagged_value(
             "TUPLESTRUCT",
-            Value::Sequence(
+            YamlValue::Sequence(
                 values
                     .iter()
                     .map(format_to_yaml)
@@ -167,30 +207,40 @@ fn container_to_yaml(container: &ContainerFormat) -> Result<Value> {
         )),
         ContainerFormat::Struct(fields) => Ok(tagged_value(
             "STRUCT",
-            Value::Sequence(
+            YamlValue::Sequence(
                 fields
                     .iter()
                     .map(|field| named_value(field, format_to_yaml))
                     .collect::<Result<Vec<_>>>()?,
             ),
         )),
-        ContainerFormat::Enum(variants) => {
-            let mut mapping = Mapping::new();
-            for (index, variant) in variants {
-                mapping.insert(
-                    serde_yaml::to_value(index)?,
-                    named_value(variant, variant_to_yaml)?,
-                );
-            }
-            Ok(tagged_value("ENUM", Value::Mapping(mapping)))
-        }
+        ContainerFormat::Enum(variants) => Ok(tagged_value(
+            "ENUM",
+            YamlValue::Mapping(
+                variants
+                    .iter()
+                    .map(|(index, variant)| {
+                        Ok((
+                            YamlValue::Number(*index as u64),
+                            named_value(variant, variant_to_yaml)?,
+                        ))
+                    })
+                    .collect::<Result<Vec<_>>>()?,
+            ),
+        )),
     }
 }
 
-fn registry_to_yaml(registry: &Registry) -> Result<Value> {
-    let mut mapping = Mapping::new();
-    for (name, container) in registry {
-        mapping.insert(Value::String(name.clone()), container_to_yaml(container)?);
-    }
-    Ok(Value::Mapping(mapping))
+fn registry_to_yaml(registry: &Registry) -> Result<YamlValue> {
+    Ok(YamlValue::Mapping(
+        registry
+            .iter()
+            .map(|(name, container)| {
+                Ok((
+                    YamlValue::String(name.clone()),
+                    container_to_yaml(container)?,
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?,
+    ))
 }
