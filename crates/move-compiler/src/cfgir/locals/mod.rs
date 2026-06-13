@@ -506,14 +506,15 @@ fn check_mutability(
                 (decl_loc, decl_msg),
             );
             if let Some(prev) = prev_assignment
-                && prev != decl_loc {
-                    let msg = if eloc == prev {
-                        "The variable is assigned multiple times here in a loop"
-                    } else {
-                        "The variable was initially assigned here"
-                    };
-                    diag.add_secondary_label((prev, msg));
-                }
+                && prev != decl_loc
+            {
+                let msg = if eloc == prev {
+                    "The variable is assigned multiple times here in a loop"
+                } else {
+                    "The variable was initially assigned here"
+                };
+                diag.add_secondary_label((prev, msg));
+            }
             context.add_diag(diag)
         }
     }

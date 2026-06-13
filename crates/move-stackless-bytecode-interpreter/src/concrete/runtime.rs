@@ -26,8 +26,8 @@ use crate::{
         player,
         settings::InterpreterSettings,
         ty::{
-            convert_model_base_type, BaseType, IntType, PrimitiveType, StructField,
-            StructInstantiation,
+            BaseType, IntType, PrimitiveType, StructField, StructInstantiation,
+            convert_model_base_type,
         },
         value::{GlobalState, TypedValue},
     },
@@ -281,7 +281,7 @@ fn check_type_instantiation(
         ));
     }
     for (arg, param) in args.iter().zip(params) {
-        if !param.1 .0.is_subset(get_abilities(env, arg)?) {
+        if !param.1.0.is_subset(get_abilities(env, arg)?) {
             return Err(PartialVMError::new(StatusCode::CONSTRAINT_NOT_SATISFIED));
         }
     }

@@ -36,12 +36,15 @@ fn run_test_with_modifiers(
 fn run_test_impl(path: &Path) -> anyhow::Result<()> {
     unsafe { std::env::set_var("NO_COLOR", "1") };
     let update_baseline = read_env_update_baseline();
-    let source_files = vec![path.to_str().unwrap().to_owned()];
+    let source_files = vec![path.to_string_lossy().replace('\\', "/")];
     let unit_test_config = UnitTestingConfig {
         num_threads: 1,
         gas_limit: Some(1000),
         source_files,
-        dep_files: move_stdlib::move_stdlib_files(),
+        dep_files: move_stdlib::move_stdlib_files()
+            .into_iter()
+            .map(|path| path.replace('\\', "/"))
+            .collect(),
         named_address_values: move_stdlib::move_stdlib_named_addresses()
             .into_iter()
             .collect(),
@@ -58,14 +61,15 @@ fn run_test_impl(path: &Path) -> anyhow::Result<()> {
     for ((buffer, _), exp_path) in run_test_with_modifiers(unit_test_config, path)? {
         let base_output = String::from_utf8(buffer)?;
         let cleaned_output = regex.replacen(&base_output, 0, r"$1$2");
+        let cleaned_output = cleaned_output.replace("\r\n", "\n");
         if update_baseline {
-            fs::write(&exp_path, &*cleaned_output)?
+            fs::write(&exp_path, &cleaned_output)?
         }
 
         let exp_exists = exp_path.is_file();
 
         if exp_exists {
-            let expected = fs::read_to_string(&exp_path)?;
+            let expected = fs::read_to_string(&exp_path)?.replace("\r\n", "\n");
             if expected != cleaned_output {
                 let msg = format!(
                     "Expected outputs differ for {:?}:\n{}",

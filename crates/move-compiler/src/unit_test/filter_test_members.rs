@@ -130,27 +130,28 @@ fn check_has_unit_test_module(
     let has_unit_test_module = has_unit_test_module(prog)
         || pre_compiled_lib.is_some_and(|p| has_unit_test_module(&p.parser));
 
-    if !has_unit_test_module && compilation_env.flags().is_testing()
+    if !has_unit_test_module
+        && compilation_env.flags().is_testing()
         && let Some(P::PackageDefinition { def, .. }) = prog
             .source_definitions
             .iter()
             .chain(prog.lib_definitions.iter())
             .next()
-        {
-            let loc = match def {
-                P::Definition::Module(P::ModuleDefinition { name, .. }) => name.0.loc,
-                P::Definition::Address(P::AddressDefinition { loc, .. }) => *loc,
-            };
-            compilation_env.add_diag(diag!(
-                Attributes::InvalidTest,
-                (
-                    loc,
-                    "Compilation in test mode requires passing the UnitTest module in the Move \
+    {
+        let loc = match def {
+            P::Definition::Module(P::ModuleDefinition { name, .. }) => name.0.loc,
+            P::Definition::Address(P::AddressDefinition { loc, .. }) => *loc,
+        };
+        compilation_env.add_diag(diag!(
+            Attributes::InvalidTest,
+            (
+                loc,
+                "Compilation in test mode requires passing the UnitTest module in the Move \
                      stdlib as a dependency",
-                )
-            ));
-            return false;
-        }
+            )
+        ));
+        return false;
+    }
 
     true
 }

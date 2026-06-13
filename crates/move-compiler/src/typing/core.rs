@@ -1434,21 +1434,22 @@ fn visibility_error(
         (vis_loc, vis_msg),
     );
     if context.env.flags().is_testing()
-        && let Some(case) = public_for_testing {
-            let (test_loc, test_msg) = match case {
-                PublicForTesting::Entry(entry_loc) => {
-                    let entry_msg = format!(
-                        "'{}' functions can be called in tests, \
+        && let Some(case) = public_for_testing
+    {
+        let (test_loc, test_msg) = match case {
+            PublicForTesting::Entry(entry_loc) => {
+                let entry_msg = format!(
+                    "'{}' functions can be called in tests, \
                     but only from testing contexts, e.g. '#[{}]' or '#[{}]'",
-                        ENTRY_MODIFIER,
-                        TestingAttribute::TEST,
-                        TestingAttribute::TEST_ONLY,
-                    );
-                    (entry_loc, entry_msg)
-                }
-            };
-            diag.add_secondary_label((test_loc, test_msg))
-        }
+                    ENTRY_MODIFIER,
+                    TestingAttribute::TEST,
+                    TestingAttribute::TEST_ONLY,
+                );
+                (entry_loc, entry_msg)
+            }
+        };
+        diag.add_secondary_label((test_loc, test_msg))
+    }
     context.env.add_diag(diag)
 }
 

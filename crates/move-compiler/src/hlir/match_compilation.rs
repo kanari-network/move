@@ -2111,8 +2111,7 @@ fn find_counterexample(
     has_guards: bool,
 ) -> bool {
     fn make_wildcards(n: usize) -> Vec<CounterExample> {
-        std::iter::repeat_n(CounterExample::Wildcard, n)
-            .collect()
+        std::iter::repeat_n(CounterExample::Wildcard, n).collect()
     }
 
     fn find_counterexample_bool(
@@ -2314,10 +2313,7 @@ fn find_counterexample(
                             datatype_name,
                             ctor,
                             is_positional,
-                            names
-                                .into_iter()
-                                .zip(ctor_args)
-                                .collect::<Vec<_>>(),
+                            names.into_iter().zip(ctor_args).collect::<Vec<_>>(),
                         )]
                         .into_iter()
                         .chain(counterexample)

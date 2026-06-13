@@ -189,7 +189,7 @@ pub fn run_test_inner(
     migration_mode: bool,
 ) -> anyhow::Result<()> {
     let flavor = package_config.flavor;
-    let targets: Vec<String> = vec![path.to_str().unwrap().to_owned()];
+    let targets = vec![path.to_string_lossy().replace('\\', "/")];
     let named_address_map = default_testing_addresses(flavor);
     let deps = vec![PackagePaths {
         name: Some(("stdlib".into(), PackageConfig::default())),
@@ -246,7 +246,7 @@ pub fn run_test_inner(
     let save_diags = read_bool_env_var(KEEP_TMP);
     let update_baseline = read_env_update_baseline();
 
-    let rendered_diags = std::str::from_utf8(&diag_buffer)?;
+    let rendered_diags = std::str::from_utf8(&diag_buffer)?.replace("\r\n", "\n");
     if save_diags {
         fs::write(out_path, &diag_buffer)?;
     }
@@ -278,7 +278,7 @@ pub fn run_test_inner(
             anyhow::bail!(add_update_baseline_fix(msg))
         }
         (true, true) => {
-            let expected_diags = fs::read_to_string(exp_path)?;
+            let expected_diags = fs::read_to_string(exp_path)?.replace("\r\n", "\n");
             if rendered_diags != expected_diags {
                 let msg = format!(
                     "Expected diagnostics differ from actual diagnostics:\n{}",

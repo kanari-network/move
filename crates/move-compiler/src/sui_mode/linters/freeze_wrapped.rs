@@ -121,28 +121,29 @@ impl<'a> TypingVisitorContext for Context<'a> {
         if let E::ModuleCall(fun) = &exp.exp.value
             && FREEZE_FUNCTIONS.iter().any(|(addr, module, fname)| {
                 fun.module.value.is(*addr, *module) && &fun.name.value().as_str() == fname
-            }) {
-                let Some(bt) = base_type(&fun.type_arguments[0]) else {
-                    // not an (potentially dereferenced) N::Type_::Apply nor N::Type_::Param
-                    return false;
-                };
-                let N::Type_::Apply(_, tname, _) = &bt.value else {
-                    // not a struct type
-                    return false;
-                };
-                let N::TypeName_::ModuleType(mident, sname) = tname.value else {
-                    // struct with a given name not found
-                    return false;
-                };
-                if let Some(wrapping_field_info) = self.find_wrapping_field_loc(mident, sname) {
-                    add_diag(
-                        self.env,
-                        fun.arguments.exp.loc,
-                        sname.value(),
-                        wrapping_field_info,
-                    );
-                }
+            })
+        {
+            let Some(bt) = base_type(&fun.type_arguments[0]) else {
+                // not an (potentially dereferenced) N::Type_::Apply nor N::Type_::Param
+                return false;
+            };
+            let N::Type_::Apply(_, tname, _) = &bt.value else {
+                // not a struct type
+                return false;
+            };
+            let N::TypeName_::ModuleType(mident, sname) = tname.value else {
+                // struct with a given name not found
+                return false;
+            };
+            if let Some(wrapping_field_info) = self.find_wrapping_field_loc(mident, sname) {
+                add_diag(
+                    self.env,
+                    fun.arguments.exp.loc,
+                    sname.value(),
+                    wrapping_field_info,
+                );
             }
+        }
         // always return false to process arguments of the call
         false
     }

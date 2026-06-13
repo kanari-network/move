@@ -24,6 +24,7 @@ use std::{
     path::{Path, PathBuf},
 };
 use tempfile::{TempDir, tempdir};
+use walkdir::WalkDir;
 
 const EXTENSIONS: &[&str] = &[
     "progress",
@@ -36,6 +37,19 @@ const EXTENSIONS: &[&str] = &[
 
 pub fn run_test(path: &Path) -> datatest_stable::Result<()> {
     if path.iter().any(|part| part == "deps_only") {
+        return Ok(());
+    }
+    if path.iter().any(|part| part == "test_symlinks")
+        && !fs::symlink_metadata(path.with_file_name("sources").join("M.move"))?
+            .file_type()
+            .is_symlink()
+    {
+        return Ok(());
+    }
+    if cfg!(windows)
+        && (path.iter().any(|part| part == "nested_deps_git_local")
+            || requires_unix_shell(path))
+    {
         return Ok(());
     }
 
@@ -89,14 +103,14 @@ impl Test<'_> {
         package_hooks::register_package_hooks(Box::new(TestHooks()));
         let update_baseline = read_env_update_baseline();
 
-        let output = self.output().unwrap_or_else(|err| format!("{:#}\n", err));
+        let output = normalize_snapshot(self.output().unwrap_or_else(|err| format!("{:#}\n", err)));
 
         if update_baseline {
             fs::write(&self.expected, &output)?;
             return Ok(());
         }
 
-        let expected = fs::read_to_string(&self.expected)?;
+        let expected = normalize_snapshot(fs::read_to_string(&self.expected)?);
         if expected != output {
             return Err(anyhow!(add_update_baseline_fix(format!(
                 "Expected outputs differ for {:?}:\n{}",
@@ -177,6 +191,33 @@ impl Test<'_> {
             ext => bail!("Unrecognised snapshot type: '{ext}'"),
         })
     }
+}
+
+fn normalize_snapshot(output: String) -> String {
+    output
+        .replace("\r\n", "\n")
+        .replace("\\\\", "/")
+        .replace('\\', "/")
+        .replace(
+            "The system cannot find the path specified. (os error 3)",
+            "No such file or directory (os error 2)",
+        )
+        .replace(
+            "The system cannot find the file specified. (os error 2)",
+            "No such file or directory (os error 2)",
+        )
+}
+
+fn requires_unix_shell(path: &Path) -> bool {
+    let Some(package_dir) = path.parent() else {
+        return false;
+    };
+    WalkDir::new(package_dir)
+        .into_iter()
+        .filter_map(Result::ok)
+        .filter(|entry| entry.file_name() == "Move.toml")
+        .filter_map(|entry| fs::read_to_string(entry.path()).ok())
+        .any(|manifest| manifest.contains(".sh"))
 }
 
 fn scrub_build_config(config: &mut BuildConfig) {

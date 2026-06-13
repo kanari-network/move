@@ -16,7 +16,7 @@ use move_binary_format::errors::Location;
 use move_core_types::{
     account_address::AccountAddress,
     language_storage::CORE_CODE_ADDRESS,
-    vm_status::{sub_status, StatusCode},
+    vm_status::{StatusCode, sub_status},
 };
 use move_model::{
     ast::TempIndex,
@@ -37,8 +37,8 @@ use crate::{
         local_state::{AbortInfo, LocalState, TerminationStatus},
         settings::InterpreterSettings,
         ty::{
-            convert_model_base_type, convert_model_local_type, convert_model_struct_type, BaseType,
-            CodeOffset, Type,
+            BaseType, CodeOffset, Type, convert_model_base_type, convert_model_local_type,
+            convert_model_struct_type,
         },
         value::{BaseValue, EvalState, GlobalState, LocalSlot, Pointer, TypedValue},
     },
@@ -449,9 +449,11 @@ impl<'env> FunctionContext<'env> {
                 None => (),
                 Some(action) => {
                     assert!(op.can_abort());
-                    assert!(local_state
-                        .get_type(action.1)
-                        .is_compatible_for_abort_code());
+                    assert!(
+                        local_state
+                            .get_type(action.1)
+                            .is_compatible_for_abort_code()
+                    );
                 }
             }
         }
@@ -1245,9 +1247,11 @@ impl<'env> FunctionContext<'env> {
         local_state: &mut LocalState,
     ) {
         if cfg!(debug_assertions) {
-            assert!(op_val
-                .get_ty()
-                .is_ref_of(local_state.get_type(local_root).get_base_type(), Some(true)));
+            assert!(
+                op_val
+                    .get_ty()
+                    .is_ref_of(local_state.get_type(local_root).get_base_type(), Some(true))
+            );
             assert!(local_state.has_value(local_root));
         }
         match op_val.get_ptr() {

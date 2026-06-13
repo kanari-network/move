@@ -222,6 +222,7 @@ impl<Progress: Write> DependencyGraphBuilder<Progress> {
         manifest_string: String,
         lock_string_opt: Option<String>,
     ) -> Result<(DependencyGraph, bool)> {
+        let manifest_string = manifest_string.replace("\r\n", "\n");
         let toml_manifest = parse_move_manifest_string(manifest_string.clone())?;
         let root_manifest = parse_source_manifest(toml_manifest)?;
 
@@ -1648,7 +1649,8 @@ fn str_escape(s: &str) -> Result<String, fmt::Error> {
 
 /// Escape a path to output in a TOML file.
 fn path_escape(p: &Path) -> Result<String, fmt::Error> {
-    str_escape(p.to_str().ok_or(fmt::Error)?)
+    let path = p.to_str().ok_or(fmt::Error)?;
+    str_escape(&path.replace(std::path::MAIN_SEPARATOR, "/"))
 }
 
 fn format_deps(

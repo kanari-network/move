@@ -3024,13 +3024,14 @@ fn process_exp_dotted(
                 _ => (BaseRefKind::Owned, base.ty.clone()),
             };
             if matches!(base_kind, BaseRefKind::Owned)
-                && let Some(verb) = constraint_verb {
-                    context.add_single_type_constraint(
-                        dloc,
-                        format!("Invalid {}", verb),
-                        base_type.clone(),
-                    );
-                }
+                && let Some(verb) = constraint_verb
+            {
+                context.add_single_type_constraint(
+                    dloc,
+                    format!("Invalid {}", verb),
+                    base_type.clone(),
+                );
+            }
             let accessors = vec![];
             ExpDotted {
                 loc: dloc,

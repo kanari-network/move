@@ -1494,6 +1494,7 @@ fn file_sources(
                     let vfs_file_path = overlay_fs.join(fname.as_str()).unwrap();
                     let mut vfs_file = vfs_file_path.open_file().unwrap();
                     let _ = vfs_file.read_to_string(&mut contents);
+                    contents = contents.replace("\r\n", "\n");
                     let fhash = FileHash::new(&contents);
                     // write to top layer of the overlay file system so that the content
                     // is immutable for the duration of compilation and symbolication

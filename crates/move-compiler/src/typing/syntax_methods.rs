@@ -31,12 +31,13 @@ pub fn validate_syntax_methods(
         if let Some(index) = &mut entry.index {
             let IndexSyntaxMethods { index, index_mut } = &mut **index;
             if let (Some(index_defn), Some(index_mut_defn)) = (index.as_ref(), index_mut.as_ref())
-                && !validate_index_syntax_methods(context, index_defn, index_mut_defn) {
-                    // If we didn't validate they wre comptaible, we remove the mut one to avoid more
-                    // typing issues later.
-                    assert!(context.env.has_errors());
-                    *index_mut = None;
-                }
+                && !validate_index_syntax_methods(context, index_defn, index_mut_defn)
+            {
+                // If we didn't validate they wre comptaible, we remove the mut one to avoid more
+                // typing issues later.
+                assert!(context.env.has_errors());
+                *index_mut = None;
+            }
         }
     }
 }

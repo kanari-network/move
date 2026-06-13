@@ -297,38 +297,40 @@ impl Move2024PathExpander {
             result: &NR,
         ) {
             if let NR::Address(_, _) | NR::ModuleIdent(_, _) | NR::Variant(_, _, _) = result
-                && let Some(tyargs) = tyargs {
-                    let mut diag = diag!(
-                        NameResolution::InvalidTypeParameter,
-                        (
-                            tyargs.loc,
-                            format!("Cannot use type parameters on {}", result.err_name())
-                        )
-                    );
-                    if let NR::Variant(_, sp!(_, (mident, name)), variant) = result {
-                        let tys = tyargs
-                            .value
-                            .iter()
-                            .map(|ty| format!("{}", ty.value))
-                            .collect::<Vec<_>>()
-                            .join(",");
-                        diag.add_note(format!("Type arguments are used with the enum, as '{mident}::{name}<{tys}>::{variant}'"))
-                    }
-                    context.env.add_diag(diag);
+                && let Some(tyargs) = tyargs
+            {
+                let mut diag = diag!(
+                    NameResolution::InvalidTypeParameter,
+                    (
+                        tyargs.loc,
+                        format!("Cannot use type parameters on {}", result.err_name())
+                    )
+                );
+                if let NR::Variant(_, sp!(_, (mident, name)), variant) = result {
+                    let tys = tyargs
+                        .value
+                        .iter()
+                        .map(|ty| format!("{}", ty.value))
+                        .collect::<Vec<_>>()
+                        .join(",");
+                    diag.add_note(format!("Type arguments are used with the enum, as '{mident}::{name}<{tys}>::{variant}'"))
                 }
+                context.env.add_diag(diag);
+            }
         }
 
         fn check_is_macro(context: &mut DefnContext, is_macro: &Option<Loc>, result: &NR) {
             if let NR::Address(_, _) | NR::ModuleIdent(_, _) = result
-                && let Some(loc) = is_macro {
-                    context.env.add_diag(diag!(
-                        NameResolution::InvalidTypeParameter,
-                        (
-                            *loc,
-                            format!("Cannot use {} as a macro invocation", result.err_name())
-                        )
-                    ));
-                }
+                && let Some(loc) = is_macro
+            {
+                context.env.add_diag(diag!(
+                    NameResolution::InvalidTypeParameter,
+                    (
+                        *loc,
+                        format!("Cannot use {} as a macro invocation", result.err_name())
+                    )
+                ));
+            }
         }
 
         match chain {

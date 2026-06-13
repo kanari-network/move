@@ -748,30 +748,32 @@ fn parse_name_access_chain_<'a, F: Fn() -> &'a str>(
     let (mut is_macro, mut tys) =
         parse_macro_opt_and_tyargs_opt(context, tyargs_whitespace_allowed, ln.loc)?;
     if let Some(loc) = &is_macro
-        && !macros_allowed {
-            let msg = format!(
-                "Macro invocation are disallowed here. Expected {}",
-                item_description()
-            );
-            context
-                .env
-                .add_diag(diag!(Syntax::InvalidName, (*loc, msg)));
-            is_macro = None;
-        }
+        && !macros_allowed
+    {
+        let msg = format!(
+            "Macro invocation are disallowed here. Expected {}",
+            item_description()
+        );
+        context
+            .env
+            .add_diag(diag!(Syntax::InvalidName, (*loc, msg)));
+        is_macro = None;
+    }
     if let Some(sp!(ty_loc, _)) = tys
-        && !tyargs_allowed {
-            context.env.add_diag(diag!(
-                Syntax::InvalidName,
-                (
-                    ty_loc,
-                    format!(
-                        "Type arguments are disallowed here. Expected {}",
-                        item_description()
-                    )
+        && !tyargs_allowed
+    {
+        context.env.add_diag(diag!(
+            Syntax::InvalidName,
+            (
+                ty_loc,
+                format!(
+                    "Type arguments are disallowed here. Expected {}",
+                    item_description()
                 )
-            ));
-            tys = None;
-        }
+            )
+        ));
+        tys = None;
+    }
 
     let ln = match ln {
         // A name by itself is a valid access chain
@@ -828,27 +830,29 @@ fn parse_name_access_chain_<'a, F: Fn() -> &'a str>(
         let (mut is_macro, mut tys) =
             parse_macro_opt_and_tyargs_opt(context, tyargs_whitespace_allowed, name.loc)?;
         if let Some(loc) = &is_macro
-            && !macros_allowed {
-                context.env.add_diag(diag!(
-                    Syntax::InvalidName,
-                    (
-                        *loc,
-                        format!("Cannot use macro invocation '!' in {}", item_description())
-                    )
-                ));
-                is_macro = None;
-            }
+            && !macros_allowed
+        {
+            context.env.add_diag(diag!(
+                Syntax::InvalidName,
+                (
+                    *loc,
+                    format!("Cannot use macro invocation '!' in {}", item_description())
+                )
+            ));
+            is_macro = None;
+        }
         if let Some(sp!(ty_loc, _)) = tys
-            && !tyargs_allowed {
-                context.env.add_diag(diag!(
-                    Syntax::InvalidName,
-                    (
-                        ty_loc,
-                        format!("Cannot use type arguments in {}", item_description())
-                    )
-                ));
-                tys = None;
-            }
+            && !tyargs_allowed
+        {
+            context.env.add_diag(diag!(
+                Syntax::InvalidName,
+                (
+                    ty_loc,
+                    format!("Cannot use type arguments in {}", item_description())
+                )
+            ));
+            tys = None;
+        }
 
         path.push_path_entry(name, tys, is_macro)
             .into_iter()
@@ -4450,7 +4454,7 @@ fn consume_spec_string(context: &mut Context) -> Result<Spanned<String>, Box<Dia
         ));
     }
 
-    s.push_str(dbg!(context.tokens.content()));
+    s.push_str(context.tokens.content());
     context.tokens.advance()?;
 
     let mut count = 1;

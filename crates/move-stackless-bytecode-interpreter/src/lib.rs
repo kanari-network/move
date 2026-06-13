@@ -1,7 +1,7 @@
 // Copyright (c) The Diem Core Contributors
 // Copyright (c) The Move Contributors
 // SPDX-License-Identifier: Apache-2.0
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use clap::Parser;
 use codespan_reporting::{diagnostic::Severity, term::termcolor::Buffer};
 use std::fmt::Write;
@@ -33,7 +33,7 @@ pub mod concrete;
 pub mod shared;
 
 use crate::concrete::{
-    runtime::{convert_move_type_tag, Runtime},
+    runtime::{Runtime, convert_move_type_tag},
     settings::InterpreterSettings,
     ty::{BaseType, IntType, PrimitiveType},
     value::{BaseValue, GlobalState, TypedValue},
@@ -257,7 +257,7 @@ impl<'env> StacklessBytecodeInterpreter<'env> {
                     Err(err.finish(Location::Undefined)),
                     ChangeSet::new(),
                     global_state.clone(),
-                )
+                );
             }
         };
 
@@ -282,7 +282,7 @@ impl<'env> StacklessBytecodeInterpreter<'env> {
                     Err(err.finish(Location::Undefined)),
                     ChangeSet::new(),
                     global_state.clone(),
-                )
+                );
             }
         };
 
@@ -298,7 +298,7 @@ impl<'env> StacklessBytecodeInterpreter<'env> {
                     Err(err.finish(Location::Undefined)),
                     ChangeSet::new(),
                     global_state.clone(),
-                )
+                );
             }
         };
 

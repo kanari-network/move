@@ -261,9 +261,7 @@ impl<T: Deref<Target = BasicBlocks>> CFG for ForwardCFG<T> {
     fn is_back_edge(&self, cur: Label, next: Label) -> bool {
         self.loop_heads
             .get(&next)
-            .is_some_and(|back_edge_predecessors| {
-                back_edge_predecessors.contains(&cur)
-            })
+            .is_some_and(|back_edge_predecessors| back_edge_predecessors.contains(&cur))
     }
 
     fn debug(&self) {
@@ -647,9 +645,7 @@ impl<'forward, Blocks: Deref<Target = BasicBlocks>> CFG for ReverseCFG<'forward,
     fn is_back_edge(&self, cur: Label, next: Label) -> bool {
         self.loop_heads
             .get(&next)
-            .is_some_and(|back_edge_predecessors| {
-                back_edge_predecessors.contains(&cur)
-            })
+            .is_some_and(|back_edge_predecessors| back_edge_predecessors.contains(&cur))
     }
 
     fn debug(&self) {

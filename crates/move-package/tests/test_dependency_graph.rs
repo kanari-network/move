@@ -105,7 +105,8 @@ fn lock_file_roundtrip() {
     let actual = fs::read_to_string(commit).expect("Reading committed lock");
 
     assert_eq!(
-        expect, actual,
+        expect.replace("\r\n", "\n"),
+        actual.replace("\r\n", "\n"),
         "LockFile -> DependencyGraph -> LockFile roundtrip"
     );
 }
