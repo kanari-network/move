@@ -292,4 +292,6 @@ pub fn run_test_inner(
     }
 }
 
-datatest_stable::harness!(move_check_testsuite, "tests/", r".*\.move$");
+datatest_stable::harness! {
+    { test = move_check_testsuite, root = "tests/", pattern = r".*\.move$" },
+}

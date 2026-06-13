@@ -16,7 +16,7 @@ pub mod transitions;
 use crate::config::{Args, EXECUTE_UNVERIFIED_MODULE, RUN_ON_VM};
 use bytecode_generator::BytecodeGenerator;
 use crossbeam_channel::{Receiver, Sender, bounded, unbounded};
-use getrandom::getrandom;
+use getrandom::fill;
 use module_generation::generate_module;
 use move_binary_format::{
     errors::VMError,
@@ -198,7 +198,7 @@ fn seed(seed: Option<String>) -> [u8; 32] {
             }
         }
         None => {
-            getrandom(&mut array).unwrap();
+            fill(&mut array).unwrap();
         }
     };
     array

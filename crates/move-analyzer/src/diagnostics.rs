@@ -1,7 +1,7 @@
 // Copyright (c) The Move Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::utils::get_loc;
+use crate::utils::{get_loc, path_to_uri};
 use codespan_reporting::{diagnostic::Severity, files::SimpleFiles};
 use lsp_types::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Range};
 use move_command_line_common::files::FileHash;
@@ -11,7 +11,6 @@ use std::{
     collections::{BTreeMap, HashMap},
     path::PathBuf,
 };
-use url::Url;
 
 /// Converts diagnostics from the codespan format to the format understood by the language server.
 pub fn lsp_diagnostics(
@@ -46,7 +45,7 @@ pub fn lsp_diagnostics(
                                 get_loc(&lloc.file_hash(), lloc.end(), files, file_id_mapping)?;
                             let lpath = file_name_mapping.get(&lloc.file_hash()).unwrap();
                             let lpos = Location::new(
-                                Url::from_file_path(lpath).unwrap(),
+                                path_to_uri(lpath).unwrap(),
                                 Range::new(lstart, lend),
                             );
                             Some(DiagnosticRelatedInformation {
@@ -90,10 +89,10 @@ pub fn lsp_empty_diagnostics(
 /// language server.
 fn severity(s: Severity) -> DiagnosticSeverity {
     match s {
-        Severity::Bug => DiagnosticSeverity::Error,
-        Severity::Error => DiagnosticSeverity::Error,
-        Severity::Warning => DiagnosticSeverity::Warning,
-        Severity::Note => DiagnosticSeverity::Information,
-        Severity::Help => DiagnosticSeverity::Hint,
+        Severity::Bug => DiagnosticSeverity::ERROR,
+        Severity::Error => DiagnosticSeverity::ERROR,
+        Severity::Warning => DiagnosticSeverity::WARNING,
+        Severity::Note => DiagnosticSeverity::INFORMATION,
+        Severity::Help => DiagnosticSeverity::HINT,
     }
 }

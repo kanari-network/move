@@ -47,8 +47,7 @@ pub fn run_test(path: &Path) -> datatest_stable::Result<()> {
         return Ok(());
     }
     if cfg!(windows)
-        && (path.iter().any(|part| part == "nested_deps_git_local")
-            || requires_unix_shell(path))
+        && (path.iter().any(|part| part == "nested_deps_git_local") || requires_unix_shell(path))
     {
         return Ok(());
     }
@@ -283,4 +282,6 @@ impl PackageHooks for TestHooks {
     }
 }
 
-datatest_stable::harness!(run_test, "tests/test_sources", r".*\.toml$");
+datatest_stable::harness! {
+    { test = run_test, root = "tests/test_sources", pattern = r".*\.toml$" },
+}
