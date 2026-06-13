@@ -19,6 +19,7 @@ colored.workspace = true
 serde_yaml.workspace = true
 tempfile.workspace = true
 sha2.workspace = true
+hex.workspace = true
 regex.workspace = true
 treeline.workspace = true
 once_cell.workspace = true

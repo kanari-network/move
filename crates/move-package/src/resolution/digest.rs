@@ -55,11 +55,11 @@ pub fn hashed_files_digest(mut hashed_files: Vec<String>) -> String {
         hasher.update(file_hash.as_bytes());
     }
 
-    format!("{:X}", hasher.finalize())
+    hex::encode_upper(hasher.finalize())
 }
 
 pub fn digest_str(data: &[u8]) -> String {
-    format!("{:X}", Sha256::digest(data))
+    hex::encode_upper(Sha256::digest(data))
 }
 
 fn normalize_source_bytes(contents: &[u8]) -> Cow<'_, [u8]> {
@@ -83,7 +83,15 @@ fn normalize_source_bytes(contents: &[u8]) -> Cow<'_, [u8]> {
 
 #[cfg(test)]
 mod tests {
-    use super::normalize_source_bytes;
+    use super::{digest_str, normalize_source_bytes};
+
+    #[test]
+    fn digest_is_uppercase_sha256() {
+        assert_eq!(
+            digest_str(b""),
+            "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        );
+    }
 
     #[test]
     fn normalizes_crlf_without_changing_other_bytes() {

@@ -5,7 +5,7 @@
 use crate::{options::ModuleGeneratorOptions, utils::random_string};
 use move_binary_format::file_format::{Bytecode, CompiledModule, Signature};
 use move_core_types::{account_address::AccountAddress, identifier::Identifier};
-use rand::{Rng, SeedableRng, rngs::StdRng};
+use rand::{RngExt, SeedableRng, rngs::StdRng};
 
 ///////////////////////////////////////////////////////////////////////////
 // Padding of tables in compiled modules
@@ -40,7 +40,7 @@ impl Pad {
     fn pad_identifier_table(&mut self, module: &mut CompiledModule) {
         module.identifiers = (0..(self.table_size + module.identifiers.len()))
             .map(|_| {
-                let len = self.r#gen.gen_range(10..self.options.max_string_size);
+                let len = self.r#gen.random_range(10..self.options.max_string_size);
                 Identifier::new(random_string(&mut self.r#gen, len)).unwrap()
             })
             .collect()

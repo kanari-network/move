@@ -18,7 +18,7 @@ use move_binary_format::file_format::{
     StructDefInstantiationIndex, StructDefinitionIndex, StructFieldInformation, TableIndex,
 };
 use move_core_types::u256::U256;
-use rand::{Rng, rngs::StdRng};
+use rand::{RngExt, rngs::StdRng};
 use tracing::{debug, error, warn};
 
 /// This type represents bytecode instructions that take a `LocalIndex`
@@ -288,7 +288,7 @@ impl<'a> BytecodeGenerator<'a> {
         if table.is_empty() {
             None
         } else {
-            Some(rng.gen_range(0..table.len()) as TableIndex)
+            Some(rng.random_range(0..table.len()) as TableIndex)
         }
     }
 
@@ -344,7 +344,7 @@ impl<'a> BytecodeGenerator<'a> {
                     // Generate a random index into the locals
                     if fn_context.locals_len > 0 {
                         Some(instruction(
-                            self.rng.gen_range(0..fn_context.locals_len) as LocalIndex
+                            self.rng.random_range(0..fn_context.locals_len) as LocalIndex
                         ))
                     } else {
                         None
@@ -356,28 +356,28 @@ impl<'a> BytecodeGenerator<'a> {
                 }
                 BytecodeType::U8(instruction) => {
                     // Generate a random u8 constant to load
-                    Some(instruction(self.rng.gen_range(0..u8::MAX)))
+                    Some(instruction(self.rng.random_range(0..u8::MAX)))
                 }
                 BytecodeType::U16(instruction) => {
                     // Generate a random u16 constant to load
-                    Some(instruction(self.rng.gen_range(0..u16::MAX)))
+                    Some(instruction(self.rng.random_range(0..u16::MAX)))
                 }
                 BytecodeType::U32(instruction) => {
                     // Generate a random u32 constant to load
-                    Some(instruction(self.rng.gen_range(0..u32::MAX)))
+                    Some(instruction(self.rng.random_range(0..u32::MAX)))
                 }
                 BytecodeType::U64(instruction) => {
                     // Generate a random u64 constant to load
-                    Some(instruction(self.rng.gen_range(0..u64::MAX)))
+                    Some(instruction(self.rng.random_range(0..u64::MAX)))
                 }
                 BytecodeType::U128(instruction) => {
                     // Generate a random u128 constant to load
-                    Some(instruction(Box::new(self.rng.gen_range(0..u128::MAX))))
+                    Some(instruction(Box::new(self.rng.random_range(0..u128::MAX))))
                 }
                 BytecodeType::U256(instruction) => {
                     // Generate a random u256 constant to load
                     Some(instruction(Box::new(
-                        self.rng.gen_range(U256::zero()..U256::zero()),
+                        self.rng.random_range(U256::zero()..U256::zero()),
                     )))
                 }
                 BytecodeType::ConstantPoolIndex(instruction) => {
@@ -434,8 +434,8 @@ impl<'a> BytecodeGenerator<'a> {
                 if (NEGATE_PRECONDITIONS
                     && !summary.preconditions.is_empty()
                     && unsatisfied_preconditions
-                        > self.rng.gen_range(0..summary.preconditions.len())
-                    && self.rng.gen_range(0..101) > 100 - (NEGATION_PROBABILITY * 100.0) as u8)
+                        > self.rng.random_range(0..summary.preconditions.len())
+                    && self.rng.random_range(0..101) > 100 - (NEGATION_PROBABILITY * 100.0) as u8)
                     || unsatisfied_preconditions == 0
                 {
                     // The size of matches cannot be greater than the number of bytecode instructions
@@ -465,7 +465,7 @@ impl<'a> BytecodeGenerator<'a> {
         let prob_add = Self::value_backpressure(state, prob_add);
         debug!("Pr[add] = {:?}", prob_add);
         let next_instruction_index;
-        if self.rng.gen_range(0.0..1.0) <= prob_add {
+        if self.rng.random_range(0.0..1.0) <= prob_add {
             let add_candidates: Vec<Bytecode> = candidates
                 .iter()
                 .filter(|(stack_effect, _)| {
@@ -479,7 +479,7 @@ impl<'a> BytecodeGenerator<'a> {
             if add_candidates.is_empty() {
                 return Err("Could not find valid add candidate".to_string());
             }
-            next_instruction_index = self.rng.gen_range(0..add_candidates.len());
+            next_instruction_index = self.rng.random_range(0..add_candidates.len());
             Ok(add_candidates[next_instruction_index].clone())
         } else {
             let sub_candidates: Vec<Bytecode> = candidates
@@ -495,7 +495,7 @@ impl<'a> BytecodeGenerator<'a> {
             if sub_candidates.is_empty() {
                 return Err("Could not find sub valid candidate".to_string());
             }
-            next_instruction_index = self.rng.gen_range(0..sub_candidates.len());
+            next_instruction_index = self.rng.random_range(0..sub_candidates.len());
             Ok(sub_candidates[next_instruction_index].clone())
         }
     }
@@ -717,7 +717,7 @@ impl<'a> BytecodeGenerator<'a> {
         module: &mut CompiledModule,
         call_graph: &mut CallGraph,
     ) -> Option<Vec<Bytecode>> {
-        let number_of_blocks = self.rng.gen_range(1..=MAX_CFG_BLOCKS);
+        let number_of_blocks = self.rng.random_range(1..=MAX_CFG_BLOCKS);
         // The number of basic blocks must be at least one based on the
         // generation range.
         debug_assert!(number_of_blocks > 0);
@@ -760,7 +760,7 @@ impl<'a> BytecodeGenerator<'a> {
                         Bytecode::LdFalse,
                         true,
                     )?;
-                    if self.rng.gen_bool(0.5) {
+                    if self.rng.random_bool(0.5) {
                         self.apply_instruction(
                             fn_context,
                             state_f,

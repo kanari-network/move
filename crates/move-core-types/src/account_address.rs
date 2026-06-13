@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use hex::FromHex;
-use rand::{Rng, rngs::OsRng};
+use rand::{TryRng, rngs::SysRng};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error as _};
 use std::{convert::TryFrom, fmt, str::FromStr};
 
@@ -45,8 +45,10 @@ impl AccountAddress {
     }
 
     pub fn random() -> Self {
-        let mut rng = OsRng;
-        let buf: [u8; Self::LENGTH] = rng.r#gen();
+        let mut buf = [0u8; Self::LENGTH];
+        SysRng
+            .try_fill_bytes(&mut buf)
+            .expect("failed to obtain randomness from the operating system");
         Self(buf)
     }
 

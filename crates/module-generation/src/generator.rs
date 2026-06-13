@@ -9,7 +9,7 @@ use move_core_types::account_address::AccountAddress;
 use move_ir_to_bytecode::compiler::compile_module;
 use move_ir_types::{ast::*, location::*};
 use move_symbol_pool::Symbol;
-use rand::{Rng, rngs::StdRng};
+use rand::{RngExt, rngs::StdRng};
 use std::{
     collections::{BTreeSet, VecDeque},
     iter::FromIterator,
@@ -87,11 +87,11 @@ pub struct ModuleGenerator<'a> {
 
 impl<'a> ModuleGenerator<'a> {
     fn index(&mut self, bound: usize) -> usize {
-        self.r#gen.gen_range(0..bound)
+        self.r#gen.random_range(0..bound)
     }
 
     fn identifier(&mut self) -> String {
-        let len = self.r#gen.gen_range(10..self.options.max_string_size);
+        let len = self.r#gen.random_range(10..self.options.max_string_size);
         random_string(self.r#gen, len)
     }
 
@@ -156,8 +156,8 @@ impl<'a> ModuleGenerator<'a> {
         // TODO: Always change the base type to a reference if it's resource type. Then we can
         // allow functions to take resources.
         // if typ.is_nominal_resource { .... }
-        if self.options.references_allowed && self.r#gen.gen_bool(0.25) {
-            let is_mutable = self.r#gen.gen_bool(0.25);
+        if self.options.references_allowed && self.r#gen.random_bool(0.25) {
+            let is_mutable = self.r#gen.random_bool(0.25);
             Type::Reference(is_mutable, Box::new(typ))
         } else {
             typ
@@ -223,7 +223,7 @@ impl<'a> ModuleGenerator<'a> {
     fn struct_fields(&mut self, ty_params: &[StructTypeParameter]) -> StructDefinitionFields {
         let num_fields = self
             .r#gen
-            .gen_range(self.options.min_fields..self.options.max_fields);
+            .random_range(self.options.min_fields..self.options.max_fields);
         let fields: Fields<Type> = init!(num_fields, {
             (
                 Spanned::unsafe_no_loc(Field_(self.identifier().into())),
@@ -324,7 +324,7 @@ impl<'a> ModuleGenerator<'a> {
     ) -> ModuleDefinition {
         // TODO: Generation of struct and function handles to the `callable_modules`
         let module_name = {
-            let len = r#gen.gen_range(10..options.max_string_size);
+            let len = r#gen.random_range(10..options.max_string_size);
             random_string(r#gen, len)
         };
         let current_module = ModuleDefinition {

@@ -1644,7 +1644,7 @@ impl<'a> fmt::Display for SubstTOML<'a> {
 
 /// Escape a string to output in a TOML file.
 fn str_escape(s: &str) -> Result<String, fmt::Error> {
-    toml::to_string(s).map_err(|_| fmt::Error)
+    Ok(toml_edit::Value::from(s).to_string())
 }
 
 /// Escape a path to output in a TOML file.

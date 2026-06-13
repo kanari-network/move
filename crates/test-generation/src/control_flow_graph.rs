@@ -4,7 +4,7 @@
 
 use crate::abstract_state::{AbstractValue, BorrowState};
 use move_binary_format::file_format::{AbilitySet, Bytecode, Signature, SignatureToken};
-use rand::{Rng, rngs::StdRng};
+use rand::{RngExt, rngs::StdRng};
 use std::collections::{HashMap, VecDeque};
 use tracing::debug;
 
@@ -102,7 +102,7 @@ impl CFG {
             debug_assert!(current_block_id < u16::MAX);
             current_block_id += 1;
             // Generate a second child edge with prob = 1/2
-            if rng.gen_bool(0.5) && current_block_id < target_blocks {
+            if rng.random_bool(0.5) && current_block_id < target_blocks {
                 // The number of edges will be at most `2*target_blocks``
                 // Since target blocks is at most a `u16`, this will not overflow even if
                 // `usize` is a `u32`
@@ -222,7 +222,7 @@ impl CFG {
     fn vary_locals(rng: &mut StdRng, locals: BlockLocals) -> BlockLocals {
         let mut locals = locals;
         for (abstr_val, availability) in locals.values_mut() {
-            if rng.gen_bool(0.5) {
+            if rng.random_bool(0.5) {
                 if *availability == BorrowState::Available {
                     *availability = BorrowState::Unavailable;
                 } else {
