@@ -20,8 +20,6 @@ use std::{
         RemAssign, Shl, Shr, Sub, SubAssign,
     },
 };
-use uint::FromStrRadixErr;
-
 // This U256 impl was chosen for now but we are open to changing it as needed
 use primitive_types::U256 as PrimitiveU256;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -31,7 +29,7 @@ const U256_NUM_BITS: usize = 256;
 pub const U256_NUM_BYTES: usize = U256_NUM_BITS / NUM_BITS_PER_BYTE;
 
 #[derive(Debug)]
-pub struct U256FromStrError(FromStrRadixErr);
+pub struct U256FromStrError(Box<dyn std::error::Error + Send + Sync>);
 
 /// A list of error categories encountered when parsing numbers.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
@@ -300,7 +298,7 @@ impl U256 {
     pub fn from_str_radix(src: &str, radix: u32) -> Result<Self, U256FromStrError> {
         PrimitiveU256::from_str_radix(src.trim_start_matches('0'), radix)
             .map(Self)
-            .map_err(U256FromStrError)
+            .map_err(|err| U256FromStrError(Box::new(err)))
     }
 
     /// U256 from 32 little endian bytes

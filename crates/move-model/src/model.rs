@@ -27,7 +27,7 @@ use std::{
 use codespan::{ByteIndex, ByteOffset, ColumnOffset, FileId, Files, LineOffset, Location, Span};
 use codespan_reporting::{
     diagnostic::{Diagnostic, Label, Severity},
-    term::{Config, emit, termcolor::WriteColor},
+    term::{Config, emit_to_write_style, termcolor::WriteColor},
 };
 use itertools::Itertools;
 #[allow(unused_imports)]
@@ -850,7 +850,7 @@ impl GlobalEnv {
                 // Avoid showing the same message twice. This can happen e.g. because of
                 // duplication of expressions via schema inclusion.
                 if shown.insert(format!("{:?}", diag)) {
-                    emit(writer, &Config::default(), &self.source_files, diag)
+                    emit_to_write_style(writer, &Config::default(), &self.source_files, diag)
                         .expect("emit must not fail");
                 }
                 *reported = true;

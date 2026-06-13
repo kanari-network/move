@@ -7,7 +7,7 @@ use codespan_reporting::{
     diagnostic::{Diagnostic, Label},
     files::SimpleFiles,
     term::{
-        Config, emit,
+        Config, emit_to_write_style,
         termcolor::{ColorChoice, StandardStream},
     },
 };
@@ -61,7 +61,7 @@ fn handle_error<T>(e: syntax::ParseError<Loc, anyhow::Error>, code_str: &str) ->
         .with_message("Parser Error")
         .with_labels(vec![lbl]);
     let writer = &mut StandardStream::stderr(ColorChoice::Auto);
-    emit(writer, &Config::default(), &files, &error).unwrap();
+    emit_to_write_style(writer, &Config::default(), &files, &error).unwrap();
     bail!("ParserError: {}", message)
 }
 

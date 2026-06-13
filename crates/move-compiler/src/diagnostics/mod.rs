@@ -20,7 +20,7 @@ use codespan_reporting::{
     self as csr,
     files::SimpleFiles,
     term::{
-        Config, emit,
+        Config, emit_to_write_style,
         termcolor::{Buffer, ColorChoice, StandardStream, WriteColor},
     },
 };
@@ -317,7 +317,7 @@ fn render_diagnostics(writer: &mut dyn WriteColor, mapping: MappedFiles, diags: 
         }
         seen.insert(diag.clone());
         let rendered = render_diagnostic(&mapping, diag);
-        emit(writer, &Config::default(), &mapping.files, &rendered).unwrap()
+        emit_to_write_style(writer, &Config::default(), &mapping.files, &rendered).unwrap()
     }
 }
 
