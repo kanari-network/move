@@ -62,7 +62,7 @@ use super::{
 /// files (if they are up-to-date) or by constructing sub-graphs by exploring all their (direct and
 /// indirect) dependencies specified in manifest files. These sub-graphs are then successively
 /// merged into larger graphs until the main combined graph is computed.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct DependencyGraph {
     /// Path to the root package and its name (according to its manifest)
     pub root_path: PathBuf,
@@ -87,6 +87,53 @@ pub struct DependencyGraph {
     pub manifest_digest: String,
     /// A hash of all the dependencies (their lock file content) this lock file depends on.
     pub deps_digest: String,
+}
+
+struct StableGraphDebug<'a> {
+    graph: &'a DiGraphMap<PackageIdentifier, Dependency>,
+}
+
+impl fmt::Debug for StableGraphDebug<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut map = f.debug_map();
+        for node in self.graph.nodes() {
+            let adjacent = self
+                .graph
+                .all_edges()
+                .filter_map(|(from, to, _)| {
+                    if from == node {
+                        Some((to, Direction::Outgoing))
+                    } else if to == node {
+                        Some((from, Direction::Incoming))
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+            map.entry(&node, &adjacent);
+        }
+        map.finish()
+    }
+}
+
+impl fmt::Debug for DependencyGraph {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DependencyGraph")
+            .field("root_path", &self.root_path)
+            .field("root_package_id", &self.root_package_id)
+            .field("root_package_name", &self.root_package_name)
+            .field(
+                "package_graph",
+                &StableGraphDebug {
+                    graph: &self.package_graph,
+                },
+            )
+            .field("package_table", &self.package_table)
+            .field("always_deps", &self.always_deps)
+            .field("manifest_digest", &self.manifest_digest)
+            .field("deps_digest", &self.deps_digest)
+            .finish()
+    }
 }
 
 /// A helper to store additional information about a dependency graph
@@ -679,7 +726,18 @@ impl DependencyGraph {
         // can be reached via a regular path
         pruned_pkgs.retain(|p| !reachable_pkgs.contains(p));
         for pkg in pruned_pkgs {
+            // Overrides replace the pruned package's source and outgoing dependencies, but
+            // packages that depended on it must remain connected. Older petgraph versions left
+            // these incoming edges behind when removing a node; preserve them explicitly.
+            let incoming_edges = self
+                .package_graph
+                .edges_directed(pkg, Direction::Incoming)
+                .map(|(from, to, dep)| (from, to, dep.clone()))
+                .collect::<Vec<_>>();
             self.package_graph.remove_node(pkg);
+            for (from, to, dep) in incoming_edges {
+                self.package_graph.add_edge(from, to, dep);
+            }
             self.package_table.remove(&pkg);
         }
 

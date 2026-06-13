@@ -193,7 +193,7 @@ impl Test<'_> {
 }
 
 fn normalize_snapshot(output: String) -> String {
-    output
+    let output = output
         .replace("\r\n", "\n")
         .replace("\\\\", "/")
         .replace('\\', "/")
@@ -204,7 +204,8 @@ fn normalize_snapshot(output: String) -> String {
         .replace(
             "The system cannot find the file specified. (os error 2)",
             "No such file or directory (os error 2)",
-        )
+        );
+    format!("{}\n", output.trim_end())
 }
 
 fn requires_unix_shell(path: &Path) -> bool {
