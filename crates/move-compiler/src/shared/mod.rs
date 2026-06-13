@@ -999,6 +999,7 @@ pub(crate) use format_oxford_list;
 /// - `fmt`: calls `println!("{}", val)`
 /// - `dbg`: calls `println!("{:?}", val)`
 /// - `sdbg`: calls `println!("{:#?}", val)`
+#[cfg(debug_assertions)]
 macro_rules! debug_print_format {
     ($val:expr) => {{
         $val.print();
@@ -1017,6 +1018,7 @@ macro_rules! debug_print_format {
     }};
 }
 
+#[cfg(debug_assertions)]
 pub(crate) use debug_print_format;
 
 /// Print formatter for debugging. Allows a few different forms:
@@ -1027,6 +1029,7 @@ pub(crate) use debug_print_format;
 /// `(lines name => val [; fmt]) ` as "name: " + for n in val { debug_print_format!(n; fmt) }
 ///
 /// See `debug_print_format` for different `fmt` options.
+#[cfg(debug_assertions)]
 macro_rules! debug_print_internal {
     () => {};
     (($name:expr => $val:expr $(; $fmt:ident)?)) => {
@@ -1058,6 +1061,7 @@ macro_rules! debug_print_internal {
     };
 }
 
+#[cfg(debug_assertions)]
 pub(crate) use debug_print_internal;
 
 /// Macro for a small DSL for compactling printing debug information based on the provided flag.

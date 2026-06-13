@@ -368,6 +368,7 @@ pub fn run_one(
 
     // Disable colors in error reporting from the Move compiler
     unsafe { env::set_var(COLOR_MODE_ENV_VAR, "NONE") };
+    let mut has_run_command = false;
     for args_line in args_file {
         let args_line = args_line?;
 
@@ -395,6 +396,7 @@ pub fn run_one(
             // allow blank lines in args.txt
             continue;
         }
+        has_run_command |= args_iter.starts_with(&["sandbox", "run"]);
 
         // enable tracing in the VM by setting the env var.
         match &trace_file {
@@ -418,6 +420,7 @@ pub fn run_one(
     // collect coverage information
     let cov_info = match &trace_file {
         None => None,
+        Some(_) if !has_run_command => None,
         Some(trace_path) => {
             if trace_path.exists() {
                 Some(collect_coverage(trace_path, &build_output)?)

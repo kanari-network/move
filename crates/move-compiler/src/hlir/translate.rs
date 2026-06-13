@@ -124,6 +124,7 @@ type VariantPositionalMap =
 
 type StructPositionalMap = UniqueMap<ModuleIdent, UniqueMap<DatatypeName, bool>>;
 
+#[cfg(debug_assertions)]
 pub(super) struct HLIRDebugFlags {
     pub(super) match_translation: bool,
     pub(super) match_variant_translation: bool,
@@ -134,6 +135,7 @@ pub(super) struct HLIRDebugFlags {
 
 pub(super) struct Context<'env> {
     pub env: &'env mut CompilationEnv,
+    #[cfg(debug_assertions)]
     pub debug: HLIRDebugFlags,
     current_package: Option<Symbol>,
     structs: UniqueMap<ModuleIdent, UniqueMap<DatatypeName, UniqueMap<Field, usize>>>,
@@ -318,6 +320,7 @@ impl<'env> Context<'env> {
                 &mdef.enums,
             );
         }
+        #[cfg(debug_assertions)]
         let debug = HLIRDebugFlags {
             match_translation: false,
             match_variant_translation: false,
@@ -327,6 +330,7 @@ impl<'env> Context<'env> {
         };
         Context {
             env,
+            #[cfg(debug_assertions)]
             debug,
             current_package: None,
             structs,
